@@ -18,8 +18,15 @@ const io = new Server(server, {
     }
 });
 
+// Make `io` accessible within our Express routes / controllers
+app.set("socketio", io);
+
 app.use(cors());
 app.use(express.json());
+
+// Routes
+// We are only registering the logs route for now!
+app.use("/api/logs", require("./routes/log.routes"));
 
 app.get("/", (req, res) => {
     res.send("DeployFlow API running");
