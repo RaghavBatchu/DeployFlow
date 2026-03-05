@@ -1,6 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
+    name VARCHAR(100) UNIQUE,
+    password_hash VARCHAR(255),
     role VARCHAR(50) -- 'developer' | 'qa' | 'devops' | 'manager'
 );
 
