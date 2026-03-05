@@ -28,7 +28,8 @@ const getPipeline = async (req, res) => {
 };
 
 const performAction = async (req, res) => {
-    const { user_name, role, action } = req.body;
+    const { action } = req.body;
+    const { name: user_name, role } = req.user; // Securely extracted from JWT
     const io = req.app.get("socketio");
 
     if (!user_name || !role || !action || !PIPELINE_CONFIG[action]) {
@@ -85,7 +86,7 @@ const performAction = async (req, res) => {
 };
 
 const resetPipeline = async (req, res) => {
-    const { user_name, role } = req.body;
+    const { name: user_name, role } = req.user;
     const io = req.app.get("socketio");
 
     // Allow any role to reset for ease of use, or restrict to manager/devops

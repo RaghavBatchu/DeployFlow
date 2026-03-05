@@ -11,10 +11,10 @@ const getUserByName = async (name) => {
     return result.rows[0];
 };
 
-const createUser = async (name, role) => {
+const createUser = async (name, password_hash, role) => {
     const result = await pool.query(
-        "INSERT INTO users (name, role) VALUES ($1, $2) RETURNING *",
-        [name, role]
+        "INSERT INTO users (name, password_hash, role) VALUES ($1, $2, $3) RETURNING *",
+        [name, password_hash, role]
     );
     return result.rows[0];
 };
