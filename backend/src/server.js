@@ -25,7 +25,7 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-// We are only registering the logs route for now!
+app.use("/api/pipeline", require("./routes/pipeline.routes"));
 app.use("/api/logs", require("./routes/log.routes"));
 
 app.get("/", (req, res) => {
