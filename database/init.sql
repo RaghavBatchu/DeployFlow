@@ -1,8 +1,10 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE,
+    name VARCHAR(100),
+    email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
-    role VARCHAR(50) -- 'developer' | 'qa' | 'devops' | 'manager'
+    role VARCHAR(50), -- 'developer' | 'qa' | 'devops' | 'manager'
+    created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE pipeline (

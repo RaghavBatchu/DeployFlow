@@ -10,7 +10,14 @@ function App() {
         <Route path="/" element={<Landing />} />
         {/* Placeholder routes — to be built after landing */}
         <Route path="/auth" element={<Auth />} />
-        <Route path="/dashboard" element={<div className="flex items-center justify-center min-h-screen text-gray-400">Dashboard coming soon</div>} />
+        <Route
+          path="/dashboard"
+          element={
+            <div className="flex items-center justify-center min-h-screen text-gray-400">
+              Dashboard coming soon
+            </div>
+          }
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

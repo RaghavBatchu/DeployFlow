@@ -13,9 +13,9 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-    cors: {
-        origin: "*"
-    }
+  cors: {
+    origin: "*",
+  },
 });
 
 // Make `io` accessible within our Express routes / controllers
@@ -32,13 +32,14 @@ app.use(express.json());
 app.use("/api/pipeline", require("./routes/pipeline.routes"));
 app.use("/api/logs", require("./routes/log.routes"));
 app.use("/api/users", require("./routes/user.routes"));
+app.use("/api/auth", require("./routes/auth.routes"));
 
 app.get("/", (req, res) => {
-    res.send("DeployFlow API running");
+  res.send("DeployFlow API running");
 });
 
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
