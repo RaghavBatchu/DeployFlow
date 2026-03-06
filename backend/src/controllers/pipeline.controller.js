@@ -78,6 +78,15 @@ const performAction = async (req, res) => {
         io.emit("pipeline_update", unlockedPipeline);
         io.emit("new_log", newLog);
 
+        // If the Manager just approved release, fire the pipeline_completed event
+        if (action === "release") {
+            const completionLog = await addLog(user_name, role, "🎉 Pipeline successfully deployed to production!");
+            io.emit("pipeline_completed", {
+                pipeline: unlockedPipeline,
+                log: completionLog
+            });
+        }
+
         res.json({ message: "Action successful", pipeline: unlockedPipeline });
     } catch (error) {
         console.error(error);
