@@ -21,6 +21,10 @@ const io = new Server(server, {
 // Make `io` accessible within our Express routes / controllers
 app.set("socketio", io);
 
+// Register Socket.io connection/presence events
+const { registerSocketEvents } = require("./socket/events");
+registerSocketEvents(io);
+
 app.use(cors());
 app.use(express.json());
 
