@@ -10,6 +10,7 @@ interface LogEntry {
   user_id?: number;
   role: string;
   action: string;
+  comment?: string;
   timestamp: string;
 }
 
@@ -83,7 +84,12 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs }) => {
                             )}
                         </span>
                      </div>
-                     <span className="block mt-1 text-xs font-semibold text-slate-400">
+                     {log.comment && (
+                       <div className="mt-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-3 italic shadow-sm">
+                         "{log.comment}"
+                       </div>
+                     )}
+                     <span className="block mt-2 text-xs font-semibold text-slate-400">
                          {formatTimestamp(log.timestamp)}
                      </span>
                   </div>

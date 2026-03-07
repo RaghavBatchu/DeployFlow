@@ -175,7 +175,9 @@ export const api = {
 
   async pipelineAction(
     pipelineId: number,
-    action: string
+    action: string,
+    decision: "approve" | "reject" = "approve",
+    comment: string = ""
   ): Promise<{ pipeline: any; toastMessage?: string }> {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -188,7 +190,7 @@ export const api = {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ pipelineId, action }),
+      body: JSON.stringify({ pipelineId, action, decision, comment }),
     });
 
     if (!response.ok) {

@@ -170,6 +170,8 @@ export default function Dashboard() {
                  <PipelineVisualizer 
                     pipeline={pipeline}
                     currentUser={user}
+                    addToast={addToast}
+                    emitAction={emitAction}
                  />
                </div>
             </div>
@@ -179,7 +181,7 @@ export default function Dashboard() {
          <div className="w-96 border-l border-slate-200 bg-white flex flex-col shrink-0 h-full shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.02)]">
             <div className="flex-1 overflow-y-auto flex flex-col py-6 space-y-6">
                <div className="px-6">
-                  <ActionPanel pipeline={pipeline} currentUser={user} addToast={addToast} emitAction={emitAction} />
+                  <ActionPanel pipeline={pipeline} currentUser={user} />
                </div>
                <div className="h-px bg-slate-100 mx-6"></div>
                <div className="px-6">

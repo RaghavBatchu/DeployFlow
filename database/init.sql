@@ -74,6 +74,7 @@ CREATE TABLE logs (
     user_id INT,
     role VARCHAR(50),
     action TEXT,
+    comment TEXT,
 
     timestamp TIMESTAMP DEFAULT NOW(),
 

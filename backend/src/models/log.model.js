@@ -1,9 +1,9 @@
 const pool = require("../db/postgres");
 
-const addLog = async (pipelineId, userId, role, action) => {
+const addLog = async (pipelineId, userId, role, action, comment = null) => {
   const result = await pool.query(
-    "INSERT INTO logs (pipeline_id, user_id, role, action) VALUES ($1, $2, $3, $4) RETURNING *",
-    [pipelineId, userId, role, action]
+    "INSERT INTO logs (pipeline_id, user_id, role, action, comment) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+    [pipelineId, userId, role, action, comment]
   );
   return result.rows[0];
 };
