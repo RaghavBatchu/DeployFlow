@@ -16,32 +16,44 @@ const STAGE_CONFIG = {
     statusField: "build_status",
     assigneeField: "developer_id",
     nextStageField: "test_status",
-    toastMessage: "Build completed successfully",
-    logAction: "Developer completed build",
+    prevStageField: null,
+    toastMessage: "Code submitted to QA successfully",
+    logAction: "Developer submitted build to QA",
+    rejectAction: null,
+    rejectTarget: null,
   },
   test: {
     requiredRole: "qa",
     statusField: "test_status",
     assigneeField: "qa_id",
     nextStageField: "deploy_status",
-    toastMessage: "Tests executed successfully",
-    logAction: "QA executed tests",
+    prevStageField: "build_status",
+    toastMessage: "Tests executed and approved successfully",
+    logAction: "QA approved and sent to DevOps",
+    rejectLogAction: "QA rejected pipeline and sent back to Developer",
+    rejectTarget: "build_status",
   },
   deploy: {
     requiredRole: "devops",
     statusField: "deploy_status",
     assigneeField: "devops_id",
     nextStageField: "release_status",
+    prevStageField: "test_status",
     toastMessage: "Deployment to staging successful",
-    logAction: "DevOps deployed staging",
+    logAction: "DevOps approved and sent to Manager",
+    rejectLogAction: "DevOps rejected pipeline and sent back to QA",
+    rejectTarget: "test_status",
   },
   release: {
     requiredRole: "manager",
     statusField: "release_status",
     assigneeField: "manager_id",
     nextStageField: null,
+    prevStageField: "deploy_status",
     toastMessage: "Production release approved",
     logAction: "Manager approved release",
+    rejectLogAction: "Manager rejected pipeline and sent back to DevOps",
+    rejectTarget: "deploy_status",
   },
 };
 
@@ -151,12 +163,17 @@ const createNewPipeline = async (req, res) => {
 };
 
 const performAction = async (req, res) => {
-  const { action, pipelineId: bodyPipelineId } = req.body;
+  const { action, pipelineId: bodyPipelineId, decision = "approve", comment } = req.body;
   const { id: userId, name: userName, role: primaryRole } = req.user;
   const io = req.app.get("socketio");
 
   if (!action || !STAGE_CONFIG[action]) {
     return res.status(400).json({ message: "Invalid action" });
+  }
+
+  // Enforce comment
+  if (!comment || comment.trim() === "") {
+    return res.status(400).json({ message: "A comment is required." });
   }
 
   const pipelineId = bodyPipelineId ? parseInt(bodyPipelineId, 10) : null;
@@ -189,29 +206,45 @@ const performAction = async (req, res) => {
       return res.status(400).json({ message: "This stage is already completed." });
     }
 
-    const prevStageField =
-      action === "build"
-        ? null
-        : STAGE_CONFIG[
-            { test: "build", deploy: "test", release: "deploy" }[action]
-          ].statusField;
-    if (prevStageField && pipeline[prevStageField] !== "completed") {
+    if (config.prevStageField && pipeline[config.prevStageField] !== "completed") {
       return res.status(400).json({
         message: "Previous stage must be completed first.",
       });
     }
 
-    let updated = await updatePipelineStage(
-      pipelineId,
-      config.statusField,
-      "completed"
-    );
+    let updated;
+    const isReject = decision === "reject";
 
-    if (config.nextStageField) {
-      updated = await unlockNextStage(pipelineId, config.nextStageField);
-      if (!updated) {
-        const row = await getPipelineById(pipelineId);
-        updated = row;
+    if (isReject) {
+      if (!config.rejectTarget) {
+        return res.status(400).json({ message: "This stage cannot be rejected." });
+      }
+
+      // Mark current as locked
+      updated = await updatePipelineStage(
+        pipelineId,
+        config.statusField,
+        "locked"
+      );
+      // Move target back to pending
+      updated = await updatePipelineStage(
+        pipelineId,
+        config.rejectTarget,
+        "pending"
+      );
+    } else {
+      updated = await updatePipelineStage(
+        pipelineId,
+        config.statusField,
+        "completed"
+      );
+
+      if (config.nextStageField) {
+        updated = await unlockNextStage(pipelineId, config.nextStageField);
+        if (!updated) {
+          const row = await getPipelineById(pipelineId);
+          updated = row;
+        }
       }
     }
 
@@ -219,7 +252,8 @@ const performAction = async (req, res) => {
       pipelineId,
       userId,
       config.requiredRole,
-      config.logAction
+      isReject ? config.rejectLogAction : config.logAction,
+      comment
     );
 
     const enriched = await enrichPipelineWithNames(updated);
@@ -232,7 +266,7 @@ const performAction = async (req, res) => {
     const logs = await getLogsByPipelineId(pipelineId);
     if (io) io.emit("logs_updated", logs);
 
-    if (action === "release") {
+    if (action === "release" && !isReject) {
       const completionLog = await addLog(
         pipelineId,
         userId,
@@ -250,7 +284,7 @@ const performAction = async (req, res) => {
     res.json({
       message: "Action successful",
       pipeline: enriched,
-      toastMessage: config.toastMessage,
+      toastMessage: isReject ? "Pipeline rejected and sent back" : config.toastMessage,
     });
   } catch (error) {
     console.error(error);

@@ -1,7 +1,16 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { auth } from "../services/api";
 
 export default function Navbar() {
+  const navigate = useNavigate();
+  const isAuthenticated = auth.isAuthenticated();
+
+  const handleLogout = () => {
+    auth.clearAuth();
+    navigate("/");
+  };
+
   return (
     <motion.nav
       initial={{ y: -60, opacity: 0 }}
@@ -33,10 +42,26 @@ export default function Navbar() {
 
       {/* Auth */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <Link to="/auth" style={{ fontSize: "14px", fontWeight: 500, color: "#374151", textDecoration: "none" }}>Sign In</Link>
-        <Link to="/auth?tab=register" style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)", color: "#fff", fontSize: "14px", fontWeight: 600, padding: "9px 20px", borderRadius: "999px", textDecoration: "none", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
-          Start Playing →
-        </Link>
+        {isAuthenticated ? (
+          <>
+            <button
+              onClick={handleLogout}
+              style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: "14px", fontWeight: 500, color: "#ef4444", textDecoration: "none" }}
+            >
+              Logout
+            </button>
+            <Link to="/dashboard" style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)", color: "#fff", fontSize: "14px", fontWeight: 600, padding: "9px 20px", borderRadius: "999px", textDecoration: "none", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
+              Dashboard →
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link to="/auth" style={{ fontSize: "14px", fontWeight: 500, color: "#374151", textDecoration: "none" }}>Sign In</Link>
+            <Link to="/auth?tab=register" style={{ background: "linear-gradient(135deg, #7c3aed, #2563eb)", color: "#fff", fontSize: "14px", fontWeight: 600, padding: "9px 20px", borderRadius: "999px", textDecoration: "none", boxShadow: "0 4px 14px rgba(124,58,237,0.3)" }}>
+              Start Playing →
+            </Link>
+          </>
+        )}
       </div>
     </motion.nav>
   );
