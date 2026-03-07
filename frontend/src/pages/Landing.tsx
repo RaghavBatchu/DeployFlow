@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import PipelineAnimation from "../components/PipelineAnimation";
 import Navbar from "../components/Navbar";
+import { auth } from "../services/api";
 
 const roles = [
   { icon: "👨‍💻", title: "Developer", desc: "Push code to trigger the build pipeline and kick off the workflow.", accent: "#7c3aed", bg: "linear-gradient(135deg, #f5f3ff, #ede9fe)", border: "#ddd6fe" },
@@ -64,8 +65,8 @@ export default function Landing() {
             </p>
 
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
-              <Link to="/auth?tab=register" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", color: "#fff", fontWeight: 700, padding: "14px 28px", borderRadius: "999px", fontSize: "15px", boxShadow: "0 8px 28px rgba(124,58,237,0.35)", textDecoration: "none", transition: "opacity 0.2s" }}>
-                → Start Simulation
+              <Link to={auth.isAuthenticated() ? "/dashboard" : "/auth?tab=register"} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", color: "#fff", fontWeight: 700, padding: "14px 28px", borderRadius: "999px", fontSize: "15px", boxShadow: "0 8px 28px rgba(124,58,237,0.35)", textDecoration: "none", transition: "opacity 0.2s" }}>
+                {auth.isAuthenticated() ? "→ Go to Dashboard" : "→ Start Simulation"}
               </Link>
               <a href="#how-it-works" style={{ display: "inline-flex", alignItems: "center", color: "#374151", fontWeight: 600, padding: "14px 24px", borderRadius: "999px", border: "1px solid #d1d5db", fontSize: "15px", textDecoration: "none", background: "rgba(255,255,255,0.7)" }}>
                 How it Works
@@ -186,8 +187,8 @@ export default function Landing() {
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "12px" }}>Get Started Now</p>
           <h2 style={{ fontSize: "2.75rem", fontWeight: 900, color: "#fff", marginBottom: "1rem", letterSpacing: "-0.5px" }}>Ready to deploy?</h2>
           <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.1rem", marginBottom: "2.5rem", lineHeight: 1.65 }}>Pick your role and join a live simulation in seconds.</p>
-          <Link to="/auth?tab=register" style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff", color: "#7c3aed", fontWeight: 800, padding: "16px 40px", borderRadius: "999px", fontSize: "16px", textDecoration: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
-            → Start Simulation for Free
+          <Link to={auth.isAuthenticated() ? "/dashboard" : "/auth?tab=register"} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff", color: "#7c3aed", fontWeight: 800, padding: "16px 40px", borderRadius: "999px", fontSize: "16px", textDecoration: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
+            {auth.isAuthenticated() ? "→ Go to Dashboard" : "→ Start Simulation for Free"}
           </Link>
         </motion.div>
       </section>
