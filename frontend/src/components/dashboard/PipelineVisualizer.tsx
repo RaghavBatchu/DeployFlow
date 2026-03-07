@@ -138,28 +138,11 @@ const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
           </div>
           <div>
             <h2 className="text-2xl font-bold text-slate-900 leading-tight">
-              main-workflow.yml
+              {pipeline?.name || "main-workflow"}
             </h2>
             <div className="flex items-center space-x-2 text-base text-slate-500 mt-1">
               <span className="font-semibold text-slate-700">
                 {pipeline?.project_name || "DeployFlow/core"}
-              </span>
-              <span>•</span>
-              <span className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-1 text-slate-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2.5"
-                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                  />
-                </svg>
-                Push to main
               </span>
             </div>
           </div>

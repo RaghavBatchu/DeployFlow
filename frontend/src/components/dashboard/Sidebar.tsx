@@ -1,15 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { User } from "../../services/api";
+import { User, api } from "../../services/api";
 
 interface SidebarProps {
   user: User | null;
   onLogout: () => void;
   connected: boolean;
   onShowTeam?: () => void;
+  onSelectPipeline?: (id: number) => void;
+  onShowHowItWorks?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam }) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam, onSelectPipeline, onShowHowItWorks }) => {
+  const [showPipelines, setShowPipelines] = useState(false);
+  const [pipelines, setPipelines] = useState<any[]>([]);
+  const [loadingPipelines, setLoadingPipelines] = useState(false);
+
+  const handleTogglePipelines = async () => {
+    if (!showPipelines) {
+      setLoadingPipelines(true);
+      try {
+        const data = await api.getPipelines();
+        setPipelines(data);
+      } catch (err) {
+        console.error("Failed to load pipelines", err);
+      } finally {
+        setLoadingPipelines(false);
+      }
+    }
+    setShowPipelines(!showPipelines);
+  };
+
   return (
     <div className="w-[240px] bg-[#10101a] flex flex-col h-full shrink-0 text-white font-sans border-r border-[#1e1e2d]">
       
@@ -40,25 +61,49 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam
 
       {/* Navigation Links */}
       <nav className="flex-1 flex flex-col space-y-2 px-1">
-        <a
-          href="#"
-          className="flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
-        >
-          <svg
-            className="w-5 h-5 mr-3 text-white"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div>
+          <button
+            onClick={handleTogglePipelines}
+            className="w-full flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
-          <span className="text-[15px] font-medium">Pipeline</span>
-        </a>
+            <svg
+              className="w-5 h-5 mr-3 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+            <span className="text-[15px] font-medium text-left flex-1">Pipeline History</span>
+            <svg className={`w-4 h-4 text-white transition-transform ${showPipelines ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+          </button>
+          
+          {showPipelines && (
+            <div className="flex flex-col mt-1 bg-[#151522] rounded-lg mx-2 p-2 max-h-[30vh] overflow-y-auto">
+              {loadingPipelines ? (
+                <div className="text-xs text-[#9ca3af] p-2 text-center flex justify-center"><div className="w-4 h-4 border-2 border-[#9ca3af] border-t-transparent rounded-full animate-spin"></div></div>
+              ) : pipelines.length > 0 ? (
+                pipelines.map(p => (
+                  <button 
+                    key={p.id} 
+                    onClick={() => onSelectPipeline && onSelectPipeline(p.id)}
+                    className="text-left text-sm text-[#d1d5db] hover:text-white hover:bg-[#1d1d2b] rounded py-2 px-3 transition-colors flex flex-col mb-1 last:mb-0"
+                  >
+                     <span className="font-semibold truncate w-full">{p.project_name || "main-workflow.yml"}</span>
+                     <span className="text-[10px] text-[#9ca3af] mt-0.5">Pipeline #{p.id}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="text-xs text-[#9ca3af] p-2 text-center">No history available</div>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={() => onShowTeam && onShowTeam()}
@@ -84,6 +129,16 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam
             />
           </svg>
           <span className="text-[15px] font-medium text-white text-left flex-1">Team</span>
+        </button>
+
+        <button
+          onClick={() => onShowHowItWorks && onShowHowItWorks()}
+          className="w-full flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
+        >
+          <svg className="w-5 h-5 mr-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-[15px] font-medium text-white text-left flex-1">How it works</span>
         </button>
       </nav>
 

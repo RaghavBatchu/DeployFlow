@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [creatingPipeline, setCreatingPipeline] = useState(false);
 
   const [showTeamModal, setShowTeamModal] = useState(false);
+  const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
 
   const [showPipelineModal, setShowPipelineModal] = useState(false);
@@ -123,7 +124,17 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen w-full bg-[#f8fafc] overflow-hidden text-slate-800 font-sans">
       {/* 1. Left Sidebar */}
-      <Sidebar user={user} onLogout={handleLogout} connected={connected} onShowTeam={handleShowTeam} />
+      <Sidebar 
+        user={user} 
+        onLogout={handleLogout} 
+        connected={connected} 
+        onShowTeam={handleShowTeam} 
+        onSelectPipeline={(id) => {
+          emitAction("refresh_pipeline", { pipelineId: id });
+          emitAction("get_logs", { pipelineId: id });
+        }}
+        onShowHowItWorks={() => setShowHowItWorksModal(true)}
+      />
 
       {/* 2 & 3. Main Center Area + Right Sidebar */}
       <div className="flex-1 flex overflow-hidden">
@@ -145,9 +156,6 @@ export default function Dashboard() {
                      {creatingPipeline ? "Creating…" : "Start New Pipeline"}
                    </button>
                  )}
-                 <button className="text-slate-400 hover:text-indigo-600 transition-colors">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                 </button>
                </div>
             </header>
 
@@ -452,6 +460,74 @@ export default function Dashboard() {
                </div>
             </div>
          </div>
+      )}
+
+      {showHowItWorksModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border border-slate-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center">
+                <svg className="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                How It Works: CI/CD Pipeline
+              </h2>
+              <button onClick={() => setShowHowItWorksModal(false)} className="text-slate-400 hover:text-rose-500 transition-colors p-1">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 max-h-[70vh] overflow-y-auto space-y-6 text-slate-600">
+              
+              <section>
+                <h3 className="text-lg font-bold text-slate-800 mb-2">The CI/CD Pipeline Process</h3>
+                <p className="mb-3 text-sm leading-relaxed">
+                  The DeployFlow application simulates a real-world Continuous Integration and Continuous Deployment (CI/CD) pipeline. When a developer creates a new pipeline, they assign various team members to specific roles for that project.
+                </p>
+                <p className="text-sm leading-relaxed">
+                  The pipeline progresses through multiple stages (e.g., Code Setup, Build, Test, Deploy). As the pipeline reaches each stage, the system waits for the assigned user (Role) to approve or trigger the necessary action. Real-time WebSockets ensure that all team members are updated instantly about the pipeline's progress and any activity logs.
+                </p>
+              </section>
+
+              <hr className="border-slate-100" />
+
+              <section>
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Function of Each Role</h3>
+                <div className="space-y-4">
+                  <div className="flex bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div className="w-10 h-10 shrink-0 bg-blue-100 text-blue-700 rounded-lg flex items-center justify-center font-bold mr-4">DEV</div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1">Developer</h4>
+                      <p className="text-sm">Developers are responsible for initiating pipelines, writing code, and triggering the build process. They can view the complete history of pipelines and manage the initial stages of the CI/CD process.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div className="w-10 h-10 shrink-0 bg-purple-100 text-purple-700 rounded-lg flex items-center justify-center font-bold mr-4">QA</div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1">QA Engineer (Quality Assurance)</h4>
+                      <p className="text-sm">QA Engineers step in during the testing stage. Their role is to review and test the application, and they have the authority to approve or reject the pipeline based on the test results before it reaches deployment.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div className="w-10 h-10 shrink-0 bg-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center font-bold mr-4">OPS</div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1">DevOps Engineer</h4>
+                      <p className="text-sm">DevOps Engineers manage the deployment infrastructure. Once the code passes testing, they are responsible for deploying the application to staging or production environments.</p>
+                    </div>
+                  </div>
+
+                  <div className="flex bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <div className="w-10 h-10 shrink-0 bg-amber-100 text-amber-700 rounded-lg flex items-center justify-center font-bold mr-4">MGR</div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 mb-1">Manager</h4>
+                      <p className="text-sm">Managers oversee the entire workflow. They monitor overall progress and provide final approvals for critical deployment stages, ensuring all business and security requirements are met.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
