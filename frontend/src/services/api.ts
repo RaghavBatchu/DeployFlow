@@ -71,6 +71,44 @@ export const api = {
 
     return response.json();
   },
+
+  async getLogs(): Promise<any[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/logs`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch logs');
+    }
+
+    return response.json();
+  },
+
+  async getPipeline(): Promise<any> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch pipeline');
+    }
+
+    return response.json();
+  },
 };
 
 export const auth = {

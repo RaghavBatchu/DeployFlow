@@ -1,0 +1,152 @@
+import React from "react";
+import { User } from "../../services/api";
+
+interface SidebarProps {
+  user: User | null;
+  onLogout: () => void;
+  connected: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected }) => {
+  return (
+    <div className="w-[240px] bg-[#10101a] flex flex-col h-full shrink-0 text-white font-sans border-r border-[#1e1e2d]">
+      
+      {/* Logo Area */}
+      <div className="px-4 py-5 flex items-center space-x-3.5 mb-6">
+        <div className="w-8 h-8 rounded shrink-0 bg-[#9333ea] flex items-center justify-center shadow-lg shadow-[#9333ea]/30">
+          <svg
+            className="w-5 h-5 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 12 12 17 22 12"></polyline>
+            <polyline points="2 17 12 22 22 17"></polyline>
+          </svg>
+        </div>
+        <span className="text-xl font-bold tracking-tight text-white">
+          DeployFlow
+        </span>
+      </div>
+
+      {/* Navigation Links */}
+      <nav className="flex-1 flex flex-col space-y-2 px-1">
+        <a
+          href="#"
+          className="flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mr-3 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
+          </svg>
+          <span className="text-[15px] font-medium">Pipeline</span>
+        </a>
+
+        <a
+          href="#"
+          className="flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mr-3 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          <span className="text-[15px] font-medium">Team</span>
+        </a>
+      </nav>
+
+      {/* Bottom Area */}
+      <div className="flex flex-col pb-1">
+        
+        <div className="flex items-center px-3 py-2.5 bg-[#1d1d2b] border border-[#2a2a3a] rounded-lg mx-3 mb-2">
+          <div className="w-10 h-10 rounded-full bg-[#9333ea] flex items-center justify-center text-base font-bold shadow-sm shrink-0 uppercase text-white">
+            {user?.name?.charAt(0) || "R"}
+          </div>
+
+          <div className="flex flex-col ml-3 overflow-hidden">
+            <span className="text-[15px] font-bold truncate leading-tight">
+              {user?.name || "Raghavendra Batchu"}
+            </span>
+            <span className="text-[11px] uppercase tracking-widest font-bold text-[#9ca3af] mt-0.5">
+              {user?.role || "DEVELOPER"}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between px-5 py-2.5">
+          <span className="text-[13px] font-medium text-[#9ca3af]">
+            Engine Status
+          </span>
+
+          <div className="flex items-center space-x-1.5">
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                connected ? "bg-[#10b981]" : "bg-red-500"
+              }`}
+            ></span>
+
+            <span
+              className={`text-[11px] font-bold uppercase tracking-wider ${
+                connected ? "text-[#10b981]" : "text-red-500"
+              }`}
+            >
+              {connected ? "CONNECTED" : "OFFLINE"}
+            </span>
+          </div>
+        </div>
+
+        <div className="h-px bg-[#1e1e2d] w-full my-1"></div>
+
+        <button
+          onClick={onLogout}
+          className="w-full flex items-center justify-center py-3 hover:bg-[#151522] transition-colors text-[15px] font-semibold group"
+        >
+          <svg
+            className="w-5 h-5 mr-2 opacity-80"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          <span className="opacity-90">Sign Out</span>
+        </button>
+
+      </div>
+    </div>
+  );
+};
+
+export default Sidebar;
