@@ -176,7 +176,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<Role>("developer");
+  const [roles, setRoles] = useState<Role[]>(["developer"]);
   const [showPw, setShowPw] = useState(false);
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -210,6 +210,10 @@ export default function Auth() {
       setError("Password is required");
       return;
     }
+    if (!roles.length) {
+      setError("Please select at least one role");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -217,7 +221,7 @@ export default function Auth() {
         name.trim(),
         email.trim(),
         password,
-        role,
+        roles,
       );
       auth.setAuth(response.token, response.user);
       navigate("/dashboard");
@@ -535,10 +539,19 @@ export default function Auth() {
                         color: "#9ca3af",
                         textTransform: "uppercase",
                         letterSpacing: "0.08em",
+                        marginBottom: 6,
+                      }}
+                    >
+                      Choose your roles
+                    </p>
+                    <p
+                      style={{
+                        fontSize: 12,
+                        color: "#6b7280",
                         marginBottom: 8,
                       }}
                     >
-                      Choose your role
+                      You can select more than one role to experience multiple perspectives in the pipeline.
                     </p>
                     <div
                       style={{
@@ -547,38 +560,44 @@ export default function Auth() {
                         gap: 8,
                       }}
                     >
-                      {ROLES.map((r) => (
-                        <button
-                          key={r.value}
-                          type="button"
-                          onClick={() => setRole(r.value)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 8,
-                            padding: "10px 14px",
-                            borderRadius: 10,
-                            fontSize: 13,
-                            fontWeight: 600,
-                            cursor: "pointer",
-                            transition: "all 0.15s",
-                            border:
-                              role === r.value
+                      {ROLES.map((r) => {
+                        const isSelected = roles.includes(r.value);
+                        return (
+                          <button
+                            key={r.value}
+                            type="button"
+                            onClick={() =>
+                              setRoles((prev) =>
+                                prev.includes(r.value)
+                                  ? prev.filter((val) => val !== r.value)
+                                  : [...prev, r.value]
+                              )
+                            }
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              padding: "10px 14px",
+                              borderRadius: 10,
+                              fontSize: 13,
+                              fontWeight: 600,
+                              cursor: "pointer",
+                              transition: "all 0.15s",
+                              border: isSelected
                                 ? `1.5px solid ${r.color}`
                                 : "1.5px solid #e5e7eb",
-                            background:
-                              role === r.value ? `${r.color}12` : "#fff",
-                            color: role === r.value ? r.color : "#6b7280",
-                            boxShadow:
-                              role === r.value
+                              background: isSelected ? `${r.color}12` : "#fff",
+                              color: isSelected ? r.color : "#6b7280",
+                              boxShadow: isSelected
                                 ? `0 0 0 3px ${r.color}18`
                                 : "none",
-                          }}
-                        >
-                          <span style={{ fontSize: 16 }}>{r.icon}</span>
-                          {r.label}
-                        </button>
-                      ))}
+                            }}
+                          >
+                            <span style={{ fontSize: 16 }}>{r.icon}</span>
+                            {r.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -30,8 +30,14 @@ const getAllUsers = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, roles } = req.body;
   const io = req.app.get("socketio");
+
+  const roleList = Array.isArray(roles)
+    ? roles
+    : role
+      ? [role]
+      : [];
 
   if (
     !name ||
@@ -39,11 +45,11 @@ const registerUser = async (req, res) => {
     !email ||
     email.trim() === "" ||
     !password ||
-    !role
+    roleList.length === 0
   ) {
     return res
       .status(400)
-      .json({ message: "Name, email, password, and role are required." });
+      .json({ message: "Name, email, password, and at least one role are required." });
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -70,9 +76,12 @@ const registerUser = async (req, res) => {
       hashedPassword
     );
 
-    const roleId = await getRoleIdByName(role);
-    if (roleId) {
-      await assignUserRole(newUser.id, roleId);
+    const uniqueRoles = [...new Set(roleList.map((r) => String(r).toLowerCase()))];
+    for (const r of uniqueRoles) {
+      const roleId = await getRoleIdByName(r);
+      if (roleId) {
+        await assignUserRole(newUser.id, roleId);
+      }
     }
 
     const primaryRole = await getPrimaryRoleForUser(newUser.id);

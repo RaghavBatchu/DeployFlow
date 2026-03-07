@@ -20,12 +20,18 @@ const getPipelines = async (limit = 50) => {
   return result.rows;
 };
 
-const createPipeline = async (developerId, qaId, devopsId, managerId) => {
+const createPipeline = async (
+  developerId,
+  qaId,
+  devopsId,
+  managerId,
+  projectName = "DeployFlow"
+) => {
   const result = await pool.query(
-    `INSERT INTO pipeline (developer_id, qa_id, devops_id, manager_id, build_status, test_status, deploy_status, release_status)
-     VALUES ($1, $2, $3, $4, 'pending', 'locked', 'locked', 'locked')
+    `INSERT INTO pipeline (developer_id, qa_id, devops_id, manager_id, project_name, build_status, test_status, deploy_status, release_status)
+     VALUES ($1, $2, $3, $4, $5, 'pending', 'locked', 'locked', 'locked')
      RETURNING *`,
-    [developerId, qaId, devopsId, managerId]
+    [developerId, qaId, devopsId, managerId, projectName]
   );
   return result.rows[0];
 };

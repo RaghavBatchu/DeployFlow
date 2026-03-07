@@ -168,7 +168,7 @@ const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
         <div className="flex justify-center items-center relative w-max mx-auto py-16">
           <div className="absolute left-[12%] right-[12%] top-1/2 -translate-y-1/2 h-1.5 bg-slate-200 z-0 rounded-full"></div>
 
-          <div className="flex space-x-12 relative z-10 w-full justify-center">
+          <div className="flex items-stretch relative z-10 w-full justify-center">
             {stages.map((stage, index) => {
               const isLast = index === stages.length - 1;
               const nextStage = !isLast ? stages[index + 1] : null;
@@ -178,9 +178,9 @@ const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
 
               return (
                 <React.Fragment key={stage.id}>
-                  <div className="relative z-10 flex flex-col items-center group w-64">
+                  <div className="relative z-10 flex flex-col group w-64 shrink-0">
                     <div
-                      className={`w-full rounded-2xl border-2 p-6 transition-all duration-300 relative bg-white ${getStatusNodeClasses(stage.displayStatus)}`}
+                      className={`w-full h-full flex flex-col rounded-2xl border-2 p-6 transition-all duration-300 relative bg-white ${getStatusNodeClasses(stage.displayStatus)}`}
                     >
                       <div className="flex items-center justify-between mb-4">
                         <div className="text-xs font-bold text-slate-400 tracking-widest uppercase">
@@ -252,17 +252,22 @@ const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
                           </span>
                         </div>
                       )}
+                      
+                      {/* Invisible spacer if assignedName is absent but we want to maintain geometry if needed, though flex-col h-full handles it */}
+                      {!stage.assignedName && (
+                         <div className="mt-auto"></div>
+                      )}
                     </div>
                   </div>
 
                   {!isLast && (
-                    <div className="w-12 h-1.5 relative z-0 mt-auto mb-auto bg-transparent shrink-0">
+                    <div className="w-12 flex items-center justify-center shrink-0 relative z-0">
                       <div
-                        className={`absolute -inset-x-6 top-0 bottom-0 transition-all duration-1000 ${
+                        className={`w-full h-1.5 transition-all duration-1000 ${
                           lineStyle === "completed"
-                            ? "bg-emerald-400"
+                            ? "bg-emerald-500"
                             : lineStyle === "in-progress"
-                              ? "bg-blue-400 animate-pulse"
+                              ? "bg-blue-500 animate-pulse"
                               : "bg-transparent"
                         }`}
                       ></div>

@@ -20,6 +20,23 @@ export default function Dashboard() {
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
 
+  const [showPipelineModal, setShowPipelineModal] = useState(false);
+  const [pipelineName, setPipelineName] = useState("");
+  const [selectedQaId, setSelectedQaId] = useState<string>("");
+  const [selectedDevopsId, setSelectedDevopsId] = useState<string>("");
+  const [selectedManagerId, setSelectedManagerId] = useState<string>("");
+  const [selectedCoDeveloperId, setSelectedCoDeveloperId] = useState<string>("");
+
+  const loadTeamMembers = async () => {
+    try {
+      const users = await api.getUsers();
+      setTeamMembers(users);
+    } catch (error) {
+      console.error("Failed to fetch team members", error);
+      addToast("Failed to load team members", "error");
+    }
+  };
+
   useEffect(() => {
     if (!auth.isAuthenticated()) {
       navigate("/auth");
@@ -36,6 +53,7 @@ export default function Dashboard() {
     };
 
     fetchInitialData();
+    loadTeamMembers();
   }, [navigate, emitAction]);
 
   const handleLogout = () => {
@@ -45,20 +63,44 @@ export default function Dashboard() {
 
   const handleShowTeam = async () => {
     setShowTeamModal(true);
-    try {
-      const users = await api.getUsers();
-      setTeamMembers(users);
-    } catch (error) {
-      console.error("Failed to fetch team members", error);
-    }
   };
 
   const handleStartNewPipeline = async () => {
     if (user?.role !== "developer" || creatingPipeline) return;
+    setShowPipelineModal(true);
+    if (!teamMembers.length) {
+      await loadTeamMembers();
+    }
+  };
+
+  const handleSubmitNewPipeline = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (user?.role !== "developer" || creatingPipeline) return;
+
+    if (!selectedQaId || !selectedDevopsId || !selectedManagerId) {
+      addToast("Please select QA, DevOps and Manager.", "error");
+      return;
+    }
+
     setCreatingPipeline(true);
     try {
-      const newPipeline = await api.createPipeline();
+      const newPipeline = await api.createPipeline({
+        projectName: pipelineName.trim() || "DeployFlow",
+        qaId: Number(selectedQaId),
+        devopsId: Number(selectedDevopsId),
+        managerId: Number(selectedManagerId),
+        developerId: user.id,
+        coDeveloperId: selectedCoDeveloperId ? Number(selectedCoDeveloperId) : undefined,
+      });
+
       addToast("Pipeline created successfully");
+      setShowPipelineModal(false);
+      setPipelineName("");
+      setSelectedQaId("");
+      setSelectedDevopsId("");
+      setSelectedManagerId("");
+      setSelectedCoDeveloperId("");
+
       emitAction("refresh_pipeline", { pipelineId: newPipeline.id });
       emitAction("get_logs", { pipelineId: newPipeline.id });
     } catch (err: any) {
@@ -142,6 +184,207 @@ export default function Dashboard() {
             </div>
          </div>
       </div>
+
+      {showPipelineModal && (
+  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl border border-slate-200 overflow-hidden">
+      <form onSubmit={handleSubmitNewPipeline}>
+        
+        {/* HEADER */}
+        <div className="px-8 py-6 border-b border-slate-200 flex items-start justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-900">
+              New Pipeline
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Define the pipeline name and assign owners for each stage.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowPipelineModal(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* BODY */}
+        <div className="px-8 py-6 space-y-6 max-h-[70vh] overflow-y-auto">
+
+          {/* Pipeline Details */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-slate-700">
+              Pipeline Details
+            </h3>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Pipeline name
+              </label>
+
+              <input
+                type="text"
+                value={pipelineName}
+                onChange={(e) => setPipelineName(e.target.value)}
+                placeholder="example: main-workflow.yml"
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          </section>
+
+          {/* Role Assignments */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold text-slate-700">
+              Role Assignments
+            </h3>
+
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                {/* QA */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    QA Engineer
+                  </label>
+
+                  <select
+                    value={selectedQaId}
+                    onChange={(e) => setSelectedQaId(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select QA</option>
+
+                    {teamMembers
+                      .filter((member) =>
+                        Array.isArray(member.roles) && member.roles.length
+                          ? member.roles.some((r) => r.toLowerCase() === "qa")
+                          : member.role === "qa"
+                      )
+                      .map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* DevOps */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    DevOps Engineer
+                  </label>
+
+                  <select
+                    value={selectedDevopsId}
+                    onChange={(e) => setSelectedDevopsId(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select DevOps</option>
+
+                    {teamMembers
+                      .filter((member) =>
+                        Array.isArray(member.roles) && member.roles.length
+                          ? member.roles.some((r) => r.toLowerCase() === "devops")
+                          : member.role === "devops"
+                      )
+                      .map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Manager */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Manager
+                  </label>
+
+                  <select
+                    value={selectedManagerId}
+                    onChange={(e) => setSelectedManagerId(e.target.value)}
+                    className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select Manager</option>
+
+                    {teamMembers
+                      .filter((member) =>
+                        Array.isArray(member.roles) && member.roles.length
+                          ? member.roles.some((r) => r.toLowerCase() === "manager")
+                          : member.role === "manager"
+                      )
+                      .map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+              </div>
+
+              {/* Additional Dev */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Additional Developer
+                  <span className="text-slate-400 ml-1">(optional)</span>
+                </label>
+
+                <select
+                  value={selectedCoDeveloperId}
+                  onChange={(e) => setSelectedCoDeveloperId(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">None</option>
+
+                  {teamMembers
+                    .filter((member) =>
+                      Array.isArray(member.roles) && member.roles.length
+                        ? member.roles.some((r) => r.toLowerCase() === "developer")
+                        : member.role === "developer"
+                    )
+                    .filter((member) => member.id !== user?.id)
+                    .map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* FOOTER */}
+        <div className="px-8 py-5 border-t border-slate-200 flex justify-between items-center bg-slate-50">
+          <button
+            type="button"
+            onClick={() => setShowPipelineModal(false)}
+            className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-300 rounded-lg hover:bg-white"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            disabled={creatingPipeline}
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow disabled:opacity-60"
+          >
+            {creatingPipeline ? "Creating..." : "Create Pipeline"}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+)}
 
       {showTeamModal && (
          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm">

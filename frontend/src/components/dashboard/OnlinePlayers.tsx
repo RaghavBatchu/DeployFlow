@@ -24,12 +24,12 @@ const OnlinePlayers: React.FC<OnlinePlayersProps> = ({ users, currentUser }) => 
          <h3 className="text-lg font-bold text-slate-900 capitalize">Team Online</h3>
          <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200 shadow-sm flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            {users.length} Active
+            {users?.length || 0} Active
          </span>
        </div>
 
        <div className="space-y-3">
-         {users.length === 0 ? (
+         {!users || users.length === 0 ? (
             <p className="text-sm font-medium text-slate-500 text-center py-4 bg-slate-50 rounded-xl border border-slate-200 border-dashed">No team members online</p>
          ) : (
             users.map((user, index) => (

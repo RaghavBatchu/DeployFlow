@@ -7,7 +7,7 @@ const {
   unlockNextStage,
 } = require("../models/pipeline.model");
 const { addLog, getLogsByPipelineId } = require("../models/log.model");
-const { getRandomUserByRole, getRolesForUser } = require("../models/role.model");
+const { getRolesForUser } = require("../models/role.model");
 const { getUserById } = require("../models/user.model");
 
 const STAGE_CONFIG = {
@@ -108,19 +108,31 @@ const createNewPipeline = async (req, res) => {
     });
   }
 
+  const {
+    projectName,
+    qaId,
+    devopsId,
+    managerId,
+    developerId,
+    coDeveloperId,
+  } = req.body || {};
+
+  if (!qaId || !devopsId || !managerId) {
+    return res.status(400).json({
+      message: "QA, DevOps and Manager users are required to create a pipeline.",
+    });
+  }
+
+  const assignedDeveloperId = developerId || userId;
+
   try {
-    const qaId = await getRandomUserByRole("qa");
-    const devopsId = await getRandomUserByRole("devops");
-    const managerId = await getRandomUserByRole("manager");
-
-    if (!qaId || !devopsId || !managerId) {
-      return res.status(400).json({
-        message:
-          "Cannot create pipeline: need at least one user with role QA, DevOps, and Manager.",
-      });
-    }
-
-    const pipeline = await createPipeline(userId, qaId, devopsId, managerId);
+    const pipeline = await createPipeline(
+      assignedDeveloperId,
+      qaId,
+      devopsId,
+      managerId,
+      projectName || "DeployFlow"
+    );
     const enriched = await enrichPipelineWithNames(pipeline);
 
     await addLog(pipeline.id, userId, role, "Pipeline created by developer.");

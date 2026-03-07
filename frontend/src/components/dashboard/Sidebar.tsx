@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { User } from "../../services/api";
 
 interface SidebarProps {
@@ -13,7 +14,10 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam
     <div className="w-[240px] bg-[#10101a] flex flex-col h-full shrink-0 text-white font-sans border-r border-[#1e1e2d]">
       
       {/* Logo Area */}
-      <div className="px-4 py-5 flex items-center space-x-3.5 mb-6">
+      <Link
+        to="/"
+        className="px-4 py-5 flex items-center space-x-3.5 mb-6 hover:bg-[#151522] transition-colors cursor-pointer"
+      >
         <div className="w-8 h-8 rounded shrink-0 bg-[#9333ea] flex items-center justify-center shadow-lg shadow-[#9333ea]/30">
           <svg
             className="w-5 h-5 text-white"
@@ -32,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam
         <span className="text-xl font-bold tracking-tight text-white">
           DeployFlow
         </span>
-      </div>
+      </Link>
 
       {/* Navigation Links */}
       <nav className="flex-1 flex flex-col space-y-2 px-1">
