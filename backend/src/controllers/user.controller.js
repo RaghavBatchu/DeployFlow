@@ -1,21 +1,25 @@
 const {
   getUsers,
   getUserByEmail,
-  getUserByName,
   createUser,
-  updateUserRole,
 } = require("../models/user.model");
+const {
+  getRoleIdByName,
+  getPrimaryRoleForUser,
+  assignUserRole,
+} = require("../models/role.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const getAllUsers = async (req, res) => {
   try {
     const users = await getUsers();
-    // Don't send password hashes to the frontend
     const safeUsers = users.map((u) => ({
       id: u.id,
       name: u.name,
+      email: u.email,
       role: u.role,
+      roles: u.roles,
       created_at: u.created_at,
     }));
     res.json(safeUsers);
@@ -26,8 +30,14 @@ const getAllUsers = async (req, res) => {
 };
 
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, roles } = req.body;
   const io = req.app.get("socketio");
+
+  const roleList = Array.isArray(roles)
+    ? roles
+    : role
+      ? [role]
+      : [];
 
   if (
     !name ||
@@ -35,14 +45,13 @@ const registerUser = async (req, res) => {
     !email ||
     email.trim() === "" ||
     !password ||
-    !role
+    roleList.length === 0
   ) {
     return res
       .status(400)
-      .json({ message: "Name, email, password, and role are required." });
+      .json({ message: "Name, email, password, and at least one role are required." });
   }
 
-  // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.trim())) {
     return res
@@ -64,23 +73,31 @@ const registerUser = async (req, res) => {
     const newUser = await createUser(
       name.trim(),
       email.trim(),
-      hashedPassword,
-      role,
+      hashedPassword
     );
 
-    // Generate JWT
+    const uniqueRoles = [...new Set(roleList.map((r) => String(r).toLowerCase()))];
+    for (const r of uniqueRoles) {
+      const roleId = await getRoleIdByName(r);
+      if (roleId) {
+        await assignUserRole(newUser.id, roleId);
+      }
+    }
+
+    const primaryRole = await getPrimaryRoleForUser(newUser.id);
+
     const token = jwt.sign(
       {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role,
+        role: primaryRole,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" },
+      { expiresIn: "24h" }
     );
 
-    io.emit("users_updated");
+    if (io) io.emit("users_updated");
     res.status(201).json({
       message: "User registered successfully",
       token,
@@ -88,7 +105,7 @@ const registerUser = async (req, res) => {
         id: newUser.id,
         name: newUser.name,
         email: newUser.email,
-        role: newUser.role,
+        role: primaryRole,
       },
     });
   } catch (error) {
@@ -98,7 +115,7 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { email, password, role_override } = req.body;
+  const { email, password } = req.body;
   const io = req.app.get("socketio");
 
   if (!email || !password) {
@@ -108,7 +125,7 @@ const loginUser = async (req, res) => {
   }
 
   try {
-    let user = await getUserByEmail(email.trim());
+    const user = await getUserByEmail(email.trim());
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials." });
     }
@@ -118,17 +135,17 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
-    // If the user wants to switch roles upon logging in
-    if (role_override && role_override !== user.role) {
-      user = await updateUserRole(user.id, role_override);
-      io.emit("users_updated");
-    }
+    const primaryRole = await getPrimaryRoleForUser(user.id);
 
-    // Generate JWT
     const token = jwt.sign(
-      { id: user.id, name: user.name, email: user.email, role: user.role },
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: primaryRole,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" },
+      { expiresIn: "24h" }
     );
 
     res.status(200).json({
@@ -138,7 +155,7 @@ const loginUser = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: primaryRole,
       },
     });
   } catch (error) {

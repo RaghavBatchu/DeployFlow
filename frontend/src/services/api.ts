@@ -1,10 +1,12 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'developer' | 'qa' | 'devops' | 'manager';
+  role: "developer" | "qa" | "devops" | "manager";
+  /** All roles for this user (when fetched from /users); use for multi-role display */
+  roles?: string[];
 }
 
 export interface AuthResponse {
@@ -14,59 +16,206 @@ export interface AuthResponse {
 }
 
 export const api = {
-  async register(name: string, email: string, password: string, role: string): Promise<AuthResponse> {
+  async register(
+    name: string,
+    email: string,
+    password: string,
+    roles: string[]
+  ): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, roles }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Registration failed');
+      throw new Error(error.message || "Registration failed");
     }
 
     return response.json();
   },
 
-  async login(email: string, password: string, roleOverride?: string): Promise<AuthResponse> {
+  async login(
+    email: string,
+    password: string,
+    roleOverride?: string
+  ): Promise<AuthResponse> {
     const body: any = { email, password };
     if (roleOverride) {
       body.role_override = roleOverride;
     }
 
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Login failed');
+      throw new Error(error.message || "Login failed");
     }
 
     return response.json();
   },
 
   async getUsers(): Promise<User[]> {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error("No authentication token found");
     }
 
     const response = await fetch(`${API_BASE_URL}/users`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch users');
+      throw new Error("Failed to fetch users");
+    }
+
+    return response.json();
+  },
+
+  async getLogs(): Promise<any[]> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/logs`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch logs");
+    }
+
+    return response.json();
+  },
+
+  async getPipeline(pipelineId?: number): Promise<any> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const url = pipelineId
+      ? `${API_BASE_URL}/pipeline?pipelineId=${pipelineId}`
+      : `${API_BASE_URL}/pipeline`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch pipeline");
+    }
+
+    return response.json();
+  },
+
+  async getPipelines(): Promise<any[]> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline/list`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch pipelines");
+    }
+
+    return response.json();
+  },
+
+  async createPipeline(data: {
+    projectName: string;
+    qaId: number;
+    devopsId: number;
+    managerId: number;
+    developerId: number;
+    coDeveloperId?: number;
+  }): Promise<any> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || "Failed to create pipeline");
+    }
+
+    return response.json();
+  },
+
+  async pipelineAction(
+    pipelineId: number,
+    action: string
+  ): Promise<{ pipeline: any; toastMessage?: string }> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline/action`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ pipelineId, action }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || "Action failed");
+    }
+
+    return response.json();
+  },
+
+  async getLogsForPipeline(pipelineId?: number): Promise<any[]> {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No authentication token found");
+    }
+
+    const url = pipelineId
+      ? `${API_BASE_URL}/logs?pipelineId=${pipelineId}`
+      : `${API_BASE_URL}/logs`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch logs");
     }
 
     return response.json();
@@ -75,25 +224,26 @@ export const api = {
 
 export const auth = {
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return !!localStorage.getItem("token");
   },
 
   getToken(): string | null {
-    return localStorage.getItem('token');
+    return localStorage.getItem("token");
   },
 
   getUser(): User | null {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    const userStr = localStorage.getItem("user");
+    return userStr ? (JSON.parse(userStr) as User) : null;
   },
 
   setAuth(token: string, user: User): void {
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
   },
 
   clearAuth(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
   },
 };
+

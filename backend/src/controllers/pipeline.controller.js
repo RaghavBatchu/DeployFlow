@@ -1,127 +1,266 @@
-const { getPipelineState, updatePipelineStage, resetPipelineDb } = require("../models/pipeline.model");
-const { addLog, clearLogs } = require("../models/log.model");
+const {
+  getPipelineById,
+  getLatestPipeline,
+  getPipelines,
+  createPipeline,
+  updatePipelineStage,
+  unlockNextStage,
+} = require("../models/pipeline.model");
+const { addLog, getLogsByPipelineId } = require("../models/log.model");
+const { getRolesForUser } = require("../models/role.model");
+const { getUserById } = require("../models/user.model");
 
-// Export configuration logic for roles and prerequisites
-const PIPELINE_CONFIG = {
-    build: { requiredRole: "developer", statusField: "build_status", requiredPrevStatus: "locked" }, // Usually starts here
-    test: { requiredRole: "qa", statusField: "test_status", requiredPrevStatus: "build_status" },
-    deploy: { requiredRole: "devops", statusField: "deploy_status", requiredPrevStatus: "test_status" },
-    release: { requiredRole: "manager", statusField: "release_status", requiredPrevStatus: "deploy_status" },
+const STAGE_CONFIG = {
+  build: {
+    requiredRole: "developer",
+    statusField: "build_status",
+    assigneeField: "developer_id",
+    nextStageField: "test_status",
+    toastMessage: "Build completed successfully",
+    logAction: "Developer completed build",
+  },
+  test: {
+    requiredRole: "qa",
+    statusField: "test_status",
+    assigneeField: "qa_id",
+    nextStageField: "deploy_status",
+    toastMessage: "Tests executed successfully",
+    logAction: "QA executed tests",
+  },
+  deploy: {
+    requiredRole: "devops",
+    statusField: "deploy_status",
+    assigneeField: "devops_id",
+    nextStageField: "release_status",
+    toastMessage: "Deployment to staging successful",
+    logAction: "DevOps deployed staging",
+  },
+  release: {
+    requiredRole: "manager",
+    statusField: "release_status",
+    assigneeField: "manager_id",
+    nextStageField: null,
+    toastMessage: "Production release approved",
+    logAction: "Manager approved release",
+  },
+};
+
+/** Enrich pipeline with user names for developer, qa, devops, manager */
+const enrichPipelineWithNames = async (row) => {
+  if (!row) return null;
+  const [dev, qa, devops, manager] = await Promise.all([
+    row.developer_id ? getUserById(row.developer_id) : null,
+    row.qa_id ? getUserById(row.qa_id) : null,
+    row.devops_id ? getUserById(row.devops_id) : null,
+    row.manager_id ? getUserById(row.manager_id) : null,
+  ]);
+  return {
+    ...row,
+    developer_name: dev?.name ?? null,
+    qa_name: qa?.name ?? null,
+    devops_name: devops?.name ?? null,
+    manager_name: manager?.name ?? null,
+    build_user: dev?.name ?? null,
+    test_user: qa?.name ?? null,
+    deploy_user: devops?.name ?? null,
+    release_user: manager?.name ?? null,
+  };
 };
 
 const getPipeline = async (req, res) => {
-    try {
-        const pipeline = await getPipelineState();
-
-        // If it's missing (shouldn't be, thanks to our seed), reset it
-        if (!pipeline) {
-            await resetPipelineDb();
-            const newState = await getPipelineState();
-            return res.json(newState);
-        }
-
-        res.json(pipeline);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Failed to fetch pipeline" });
+  try {
+    const pipelineId = req.query.pipelineId ? parseInt(req.query.pipelineId, 10) : null;
+    let row;
+    if (pipelineId) {
+      row = await getPipelineById(pipelineId);
+    } else {
+      row = await getLatestPipeline();
     }
+    if (!row) {
+      return res.json(null);
+    }
+    const pipeline = await enrichPipelineWithNames(row);
+    res.json(pipeline);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch pipeline" });
+  }
+};
+
+const getPipelineList = async (req, res) => {
+  try {
+    const rows = await getPipelines();
+    const pipelines = await Promise.all(rows.map((row) => enrichPipelineWithNames(row)));
+    res.json(pipelines);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch pipelines" });
+  }
+};
+
+const createNewPipeline = async (req, res) => {
+  const { id: userId, name, role } = req.user;
+  const io = req.app.get("socketio");
+
+  if (role !== "developer") {
+    return res.status(403).json({
+      message: "Only developers can start a new pipeline.",
+    });
+  }
+
+  const {
+    projectName,
+    qaId,
+    devopsId,
+    managerId,
+    developerId,
+    coDeveloperId,
+  } = req.body || {};
+
+  if (!qaId || !devopsId || !managerId) {
+    return res.status(400).json({
+      message: "QA, DevOps and Manager users are required to create a pipeline.",
+    });
+  }
+
+  const assignedDeveloperId = developerId || userId;
+
+  try {
+    const pipeline = await createPipeline(
+      assignedDeveloperId,
+      qaId,
+      devopsId,
+      managerId,
+      projectName || "DeployFlow"
+    );
+    const enriched = await enrichPipelineWithNames(pipeline);
+
+    await addLog(pipeline.id, userId, role, "Pipeline created by developer.");
+
+    if (io) {
+      io.emit("pipeline_updated", enriched);
+      const logs = await getLogsByPipelineId(pipeline.id);
+      io.emit("logs_updated", logs);
+    }
+
+    res.status(201).json(enriched);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to create pipeline" });
+  }
 };
 
 const performAction = async (req, res) => {
-    const { action } = req.body;
-    const { name: user_name, role } = req.user; // Securely extracted from JWT
-    const io = req.app.get("socketio");
+  const { action, pipelineId: bodyPipelineId } = req.body;
+  const { id: userId, name: userName, role: primaryRole } = req.user;
+  const io = req.app.get("socketio");
 
-    if (!user_name || !role || !action || !PIPELINE_CONFIG[action]) {
-        return res.status(400).json({ message: "Invalid action or missing user data" });
+  if (!action || !STAGE_CONFIG[action]) {
+    return res.status(400).json({ message: "Invalid action" });
+  }
+
+  const pipelineId = bodyPipelineId ? parseInt(bodyPipelineId, 10) : null;
+  if (!pipelineId) {
+    return res.status(400).json({ message: "pipelineId is required" });
+  }
+
+  const config = STAGE_CONFIG[action];
+  const userRoles = await getRolesForUser(userId);
+  if (!userRoles || !userRoles.includes(config.requiredRole)) {
+    return res.status(403).json({
+      message: `You need the ${config.requiredRole} role to perform this action.`,
+    });
+  }
+
+  try {
+    const pipeline = await getPipelineById(pipelineId);
+    if (!pipeline) {
+      return res.status(404).json({ message: "Pipeline not found" });
     }
 
-    const config = PIPELINE_CONFIG[action];
-
-    if (role !== config.requiredRole) {
-        return res.status(403).json({ message: `Access Denied: Only a ${config.requiredRole} can perform this action.` });
+    const assigneeId = pipeline[config.assigneeField];
+    if (assigneeId !== userId) {
+      return res.status(403).json({
+        message: "Only the assigned team member for this stage can perform this action.",
+      });
     }
 
-    try {
-        const currentState = await getPipelineState();
-
-        // Enforce lock sequence
-        if (config.requiredPrevStatus !== "locked") {
-            const prevStageResult = currentState[config.requiredPrevStatus];
-            if (prevStageResult !== "completed") {
-                return res.status(400).json({ message: `Action locked. Waiting on earlier stage to complete.` });
-            }
-        }
-
-        // Is the current stage already done?
-        if (currentState[config.statusField] === "completed") {
-            return res.status(400).json({ message: "This stage is already completed." });
-        }
-
-        // Update status to complete (Simulating a direct completion for now)
-        const newPipeline = await updatePipelineStage(config.statusField, "completed");
-
-        // Also unlock the next step in the pipeline (set it to pending instead of locked)
-        let unlockedPipeline = newPipeline;
-        if (action === "build") {
-            unlockedPipeline = await updatePipelineStage("test_status", "pending");
-        } else if (action === "test") {
-            unlockedPipeline = await updatePipelineStage("deploy_status", "pending");
-        } else if (action === "deploy") {
-            unlockedPipeline = await updatePipelineStage("release_status", "pending");
-        }
-
-        // Create log with the user's display name
-        const newLog = await addLog(user_name, role, `${user_name} completed the ${action} stage.`);
-
-        // Emit updates via Socket.io
-        io.emit("pipeline_update", unlockedPipeline);
-        io.emit("new_log", newLog);
-
-        // If the Manager just approved release, fire the pipeline_completed event
-        if (action === "release") {
-            const completionLog = await addLog(user_name, role, "🎉 Pipeline successfully deployed to production!");
-            io.emit("pipeline_completed", {
-                pipeline: unlockedPipeline,
-                log: completionLog
-            });
-        }
-
-        res.json({ message: "Action successful", pipeline: unlockedPipeline });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Failed to perform action" });
+    if (pipeline[config.statusField] === "completed") {
+      return res.status(400).json({ message: "This stage is already completed." });
     }
+
+    const prevStageField =
+      action === "build"
+        ? null
+        : STAGE_CONFIG[
+            { test: "build", deploy: "test", release: "deploy" }[action]
+          ].statusField;
+    if (prevStageField && pipeline[prevStageField] !== "completed") {
+      return res.status(400).json({
+        message: "Previous stage must be completed first.",
+      });
+    }
+
+    let updated = await updatePipelineStage(
+      pipelineId,
+      config.statusField,
+      "completed"
+    );
+
+    if (config.nextStageField) {
+      updated = await unlockNextStage(pipelineId, config.nextStageField);
+      if (!updated) {
+        const row = await getPipelineById(pipelineId);
+        updated = row;
+      }
+    }
+
+    const newLog = await addLog(
+      pipelineId,
+      userId,
+      config.requiredRole,
+      config.logAction
+    );
+
+    const enriched = await enrichPipelineWithNames(updated);
+
+    if (io) {
+      io.emit("pipeline_updated", enriched);
+      io.emit("new_log", { ...newLog, user_name: userName });
+    }
+
+    const logs = await getLogsByPipelineId(pipelineId);
+    if (io) io.emit("logs_updated", logs);
+
+    if (action === "release") {
+      const completionLog = await addLog(
+        pipelineId,
+        userId,
+        config.requiredRole,
+        "Pipeline successfully deployed to production!"
+      );
+      if (io) {
+        io.emit("pipeline_completed", {
+          pipeline: enriched,
+          log: { ...completionLog, user_name: userName },
+        });
+      }
+    }
+
+    res.json({
+      message: "Action successful",
+      pipeline: enriched,
+      toastMessage: config.toastMessage,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to perform action" });
+  }
 };
 
-const resetPipeline = async (req, res) => {
-    const { name: user_name, role } = req.user;
-    const io = req.app.get("socketio");
-
-    // Allow any role to reset for ease of use, or restrict to manager/devops
-    if (role !== "manager" && role !== "devops") {
-        return res.status(403).json({ message: "Only a Manager or DevOps can reset the pipeline." });
-    }
-
-    try {
-        const resetState = await resetPipelineDb();
-        await clearLogs();
-
-        const newLog = await addLog(user_name, role, `${user_name} reset the entire pipeline.`);
-
-        io.emit("pipeline_update", resetState);
-        io.emit("new_log", newLog);
-        io.emit("logs_cleared", true);
-
-        res.json({ message: "Pipeline reset", pipeline: resetState });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Failed to reset" });
-    }
-}
-
 module.exports = {
-    getPipeline,
-    performAction,
-    resetPipeline
+  getPipeline,
+  getPipelineList,
+  createNewPipeline,
+  performAction,
 };
