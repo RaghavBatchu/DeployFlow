@@ -1,27 +1,43 @@
 const pool = require("../db/postgres");
 
-const addLog = async (user_name, role, action) => {
-    const result = await pool.query(
-        "INSERT INTO logs (user_name, role, action) VALUES ($1, $2, $3) RETURNING *",
-        [user_name, role, action]
-    );
-    return result.rows[0];
+const addLog = async (pipelineId, userId, role, action) => {
+  const result = await pool.query(
+    "INSERT INTO logs (pipeline_id, user_id, role, action) VALUES ($1, $2, $3, $4) RETURNING *",
+    [pipelineId, userId, role, action]
+  );
+  return result.rows[0];
+};
+
+const getLogsByPipelineId = async (pipelineId, limit = 50) => {
+  const result = await pool.query(
+    `SELECT l.*, u.name AS user_name FROM logs l
+     LEFT JOIN users u ON u.id = l.user_id
+     WHERE l.pipeline_id = $1
+     ORDER BY l.timestamp DESC
+     LIMIT $2`,
+    [pipelineId, limit]
+  );
+  return result.rows;
 };
 
 const getRecentLogs = async (limit = 50) => {
-    const result = await pool.query(
-        "SELECT * FROM logs ORDER BY timestamp DESC LIMIT $1",
-        [limit]
-    );
-    return result.rows;
+  const result = await pool.query(
+    `SELECT l.*, u.name AS user_name FROM logs l
+     LEFT JOIN users u ON u.id = l.user_id
+     ORDER BY l.timestamp DESC
+     LIMIT $1`,
+    [limit]
+  );
+  return result.rows;
 };
 
-const clearLogs = async () => {
-    await pool.query("DELETE FROM logs");
-}
+const clearLogsForPipeline = async (pipelineId) => {
+  await pool.query("DELETE FROM logs WHERE pipeline_id = $1", [pipelineId]);
+};
 
 module.exports = {
-    addLog,
-    getRecentLogs,
-    clearLogs
+  addLog,
+  getLogsByPipelineId,
+  getRecentLogs,
+  clearLogsForPipeline,
 };

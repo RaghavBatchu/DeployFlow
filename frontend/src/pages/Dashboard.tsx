@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, api, User } from "../services/api";
 import { useSocket } from "../contexts/SocketContext";
+import { useToast } from "../contexts/ToastContext";
 import Sidebar from "../components/dashboard/Sidebar.tsx";
 import PipelineVisualizer from "../components/dashboard/PipelineVisualizer.tsx";
 import ActivityLog from "../components/dashboard/ActivityLog.tsx";
@@ -10,10 +11,11 @@ import ActionPanel from "../components/dashboard/ActionPanel.tsx";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { socket, connected, onlineUsers, logs, pipeline, emitAction } =
-    useSocket();
+  const { connected, onlineUsers, logs, pipeline, emitAction } = useSocket();
+  const { addToast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [creatingPipeline, setCreatingPipeline] = useState(false);
 
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
@@ -27,15 +29,10 @@ export default function Dashboard() {
     const currentUser = auth.getUser();
     setUser(currentUser);
 
-    const fetchInitialData = async () => {
-      try {
-        emitAction("refresh_pipeline");
-        emitAction("get_logs");
-      } catch (error) {
-        console.error("Failed to fetch initial data:", error);
-      } finally {
-        setLoading(false);
-      }
+    const fetchInitialData = () => {
+      emitAction("refresh_pipeline");
+      emitAction("get_logs");
+      setLoading(false);
     };
 
     fetchInitialData();
@@ -47,13 +44,28 @@ export default function Dashboard() {
   };
 
   const handleShowTeam = async () => {
-     setShowTeamModal(true);
-     try {
-        const users = await api.getUsers();
-        setTeamMembers(users);
-     } catch (error) {
-        console.error("Failed to fetch team members", error);
-     }
+    setShowTeamModal(true);
+    try {
+      const users = await api.getUsers();
+      setTeamMembers(users);
+    } catch (error) {
+      console.error("Failed to fetch team members", error);
+    }
+  };
+
+  const handleStartNewPipeline = async () => {
+    if (user?.role !== "developer" || creatingPipeline) return;
+    setCreatingPipeline(true);
+    try {
+      const newPipeline = await api.createPipeline();
+      addToast("Pipeline created successfully");
+      emitAction("refresh_pipeline", { pipelineId: newPipeline.id });
+      emitAction("get_logs", { pipelineId: newPipeline.id });
+    } catch (err: any) {
+      addToast(err.message || "Failed to create pipeline", "error");
+    } finally {
+      setCreatingPipeline(false);
+    }
   };
 
   if (loading) {
@@ -80,7 +92,17 @@ export default function Dashboard() {
                <div>
                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">CI/CD Workflows</h1>
                </div>
-               <div className="flex items-center space-x-6">
+               <div className="flex items-center space-x-4">
+                 {user?.role === "developer" && (
+                   <button
+                     onClick={handleStartNewPipeline}
+                     disabled={creatingPipeline}
+                     className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold rounded-xl shadow-md transition-colors"
+                   >
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" /></svg>
+                     {creatingPipeline ? "Creating…" : "Start New Pipeline"}
+                   </button>
+                 )}
                  <button className="text-slate-400 hover:text-indigo-600 transition-colors">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
                  </button>
@@ -97,8 +119,7 @@ export default function Dashboard() {
                <div className="w-full max-w-[1400px] relative z-10 flex flex-col items-center justify-center h-full">
                  <PipelineVisualizer 
                     pipeline={pipeline}
-                    emitAction={emitAction}
-                    userRole={user?.role}
+                    currentUser={user}
                  />
                </div>
             </div>
@@ -108,7 +129,7 @@ export default function Dashboard() {
          <div className="w-96 border-l border-slate-200 bg-white flex flex-col shrink-0 h-full shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.02)]">
             <div className="flex-1 overflow-y-auto flex flex-col py-6 space-y-6">
                <div className="px-6">
-                  <ActionPanel pipeline={pipeline} emitAction={emitAction} userRole={user?.role} />
+                  <ActionPanel pipeline={pipeline} currentUser={user} addToast={addToast} emitAction={emitAction} />
                </div>
                <div className="h-px bg-slate-100 mx-6"></div>
                <div className="px-6">
@@ -149,24 +170,31 @@ export default function Dashboard() {
                                    </div>
                                    <p className="text-sm text-slate-500 truncate mt-0.5">{member.email}</p>
                                 </div>
-                                {['developer', 'qa', 'devops', 'manager'].some(r => String(member.role || '').toLowerCase().includes(r)) ? (
-                                    <div className="flex flex-col gap-1.5 items-end">
-                                      {['developer', 'qa', 'devops', 'manager'].filter(r => String(member.role || '').toLowerCase().includes(r)).map(r => (
+                                {(() => {
+                                  const rolesToShow = Array.isArray(member.roles) && member.roles.length
+                                    ? member.roles
+                                    : (member.role ? [member.role] : []);
+                                  const pipelineRoles = ['developer', 'qa', 'devops', 'manager'];
+                                  const hasRoles = rolesToShow.some((r: string) => pipelineRoles.includes(String(r).toLowerCase()));
+                                  return hasRoles ? (
+                                    <div className="flex flex-col gap-1.5 items-end flex-wrap">
+                                      {rolesToShow.filter((r: string) => pipelineRoles.includes(String(r).toLowerCase())).map((r: string) => (
                                         <span key={r} className={`px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-md ${
                                             r === 'developer' ? 'bg-blue-100 text-blue-700' :
                                             r === 'qa' ? 'bg-purple-100 text-purple-700' :
                                             r === 'devops' ? 'bg-emerald-100 text-emerald-700' :
                                             'bg-amber-100 text-amber-700'
                                         }`}>
-                                           {r}
+                                          {r}
                                         </span>
                                       ))}
                                     </div>
-                                ) : (
+                                  ) : (
                                     <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-md bg-slate-100 text-slate-700">
-                                       {String(member.role || 'No Role')}
+                                      {String(member.role || 'No Role')}
                                     </span>
-                                )}
+                                  );
+                                })()}
                             </div>
                          ))}
                       </div>

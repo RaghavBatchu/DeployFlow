@@ -46,10 +46,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log("Connected to server");
       setConnected(true);
 
-      // Join with user info
       const user = auth.getUser();
       if (user) {
-        newSocket.emit("user_join", { name: user.name, role: user.role });
+        newSocket.emit("user_join", {
+          name: user.name,
+          role: user.role,
+          id: user.id,
+        });
       }
     });
 
@@ -67,11 +70,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     newSocket.on("new_log", (log: any) => {
-      setLogs((prev) => [log, ...prev].slice(0, 100)); // Keep last 100 logs
+      setLogs((prev) => [log, ...prev].slice(0, 100));
     });
 
     newSocket.on("pipeline_updated", (pipelineState: any) => {
       setPipeline(pipelineState);
+      if (pipelineState?.id) {
+        newSocket.emit("get_logs", { pipelineId: pipelineState.id });
+      }
     });
 
     newSocket.on("error", (error: any) => {

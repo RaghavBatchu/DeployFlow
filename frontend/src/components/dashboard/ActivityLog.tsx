@@ -6,7 +6,8 @@ interface ActivityLogProps {
 
 interface LogEntry {
   id: number;
-  user_name: string;
+  user_name?: string;
+  user_id?: number;
   role: string;
   action: string;
   timestamp: string;
@@ -67,18 +68,18 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs }) => {
                 >
                   {/* Avatar Icon Node */}
                   <div className="mr-5 mt-0.5 w-11 h-11 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center shrink-0 shadow-sm z-10 overflow-hidden relative group/node">
-                     <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${log.user_name}`} alt="avatar" className="opacity-100 w-full h-full object-cover"/>
+                     <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${log.user_name ?? log.id ?? "user"}`} alt="avatar" className="opacity-100 w-full h-full object-cover"/>
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0 pt-1">
                      <div className="flex items-center space-x-2 text-sm text-slate-600 leading-snug">
-                        <span className="font-bold text-slate-900">{log.user_name}</span>
+                        <span className="font-bold text-slate-900">{log.user_name ?? "System"}</span>
                         <span>
                             {log.action.includes('error') || log.action.includes('failed') ? (
                                 <span className="text-rose-600 font-medium">Encountered an error: {parseAction(log.action)}</span>
                             ) : (
-                                <span>Triggered <span className="font-semibold text-slate-800">{parseAction(log.action)}</span></span>
+                                <span>{log.action}</span>
                             )}
                         </span>
                      </div>

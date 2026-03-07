@@ -4,11 +4,14 @@ import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import { SocketProvider } from "./contexts/SocketContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import { ToastContainer } from "./components/Toast";
 
 function App() {
   return (
-    <SocketProvider>
-      <BrowserRouter>
+    <ToastProvider>
+      <SocketProvider>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
           {/* Placeholder routes — to be built after landing */}
@@ -18,6 +21,8 @@ function App() {
         </Routes>
       </BrowserRouter>
     </SocketProvider>
+    <ToastContainer />
+    </ToastProvider>
   );
 }
 

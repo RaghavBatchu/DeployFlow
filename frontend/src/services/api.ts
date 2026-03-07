@@ -5,6 +5,8 @@ export interface User {
   name: string;
   email: string;
   role: 'developer' | 'qa' | 'devops' | 'manager';
+  /** All roles for this user (when fetched from /users); use for multi-role display */
+  roles?: string[];
 }
 
 export interface AuthResponse {
@@ -91,13 +93,16 @@ export const api = {
     return response.json();
   },
 
-  async getPipeline(): Promise<any> {
+  async getPipeline(pipelineId?: number): Promise<any> {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${API_BASE_URL}/pipeline`, {
+    const url = pipelineId
+      ? `${API_BASE_URL}/pipeline?pipelineId=${pipelineId}`
+      : `${API_BASE_URL}/pipeline`;
+    const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
@@ -105,6 +110,92 @@ export const api = {
 
     if (!response.ok) {
       throw new Error('Failed to fetch pipeline');
+    }
+
+    return response.json();
+  },
+
+  async getPipelines(): Promise<any[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline/list`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch pipelines');
+    }
+
+    return response.json();
+  },
+
+  async createPipeline(): Promise<any> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to create pipeline');
+    }
+
+    return response.json();
+  },
+
+  async pipelineAction(pipelineId: number, action: string): Promise<{ pipeline: any; toastMessage?: string }> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/pipeline/action`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pipelineId, action }),
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Action failed');
+    }
+
+    return response.json();
+  },
+
+  async getLogs(pipelineId?: number): Promise<any[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const url = pipelineId
+      ? `${API_BASE_URL}/logs?pipelineId=${pipelineId}`
+      : `${API_BASE_URL}/logs`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch logs');
     }
 
     return response.json();
