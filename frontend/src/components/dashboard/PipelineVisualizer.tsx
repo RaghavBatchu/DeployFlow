@@ -82,7 +82,7 @@ const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
     if (!userRole || !emitAction) return false;
 
     const rolePermissions: { [key: string]: string[] } = {
-      developer: ["build"],
+      developer: ["build", "test"],
       qa: ["test"],
       devops: ["deploy", "release"],
       manager: ["build", "test", "deploy", "release"],
@@ -95,7 +95,13 @@ const PipelineVisualizer: React.FC<PipelineVisualizerProps> = ({
     if (stageIndex > 0 && stages[stageIndex - 1].status !== "completed")
       return false;
 
-    return rolePermissions[userRole]?.includes(stageId);
+    // Combine permissions for all roles this user string contains
+    const userRoleStr = String(userRole).toLowerCase();
+    const hasPermission = Object.entries(rolePermissions).some(([role, permissions]) => {
+        return userRoleStr.includes(role) && permissions.includes(stageId);
+    });
+
+    return hasPermission;
   };
 
   const handleStartStage = (stageId: string) => {

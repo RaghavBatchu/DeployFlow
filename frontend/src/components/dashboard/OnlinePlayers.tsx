@@ -46,9 +46,19 @@ const OnlinePlayers: React.FC<OnlinePlayersProps> = ({ users, currentUser }) => 
                               <span className="text-base font-semibold text-slate-900 leading-tight">{user.name}</span>
                               {user.id === currentUser?.id && <span className="text-[11px] font-bold text-slate-500 uppercase">(You)</span>}
                           </div>
-                          <span className={`text-[11px] uppercase tracking-wider font-bold truncate inline-block mt-1 w-fit rounded px-1.5 ${getRoleBadge(user.role)}`}>
-                              {user.role}
-                          </span>
+                          {['developer', 'qa', 'devops', 'manager'].some(r => String(user.role || '').toLowerCase().includes(r)) ? (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {['developer', 'qa', 'devops', 'manager'].filter(r => String(user.role || '').toLowerCase().includes(r)).map(r => (
+                                  <span key={r} className={`text-[9px] uppercase tracking-wider font-bold rounded px-1.5 py-0.5 ${getRoleBadge(r)}`}>
+                                      {r}
+                                  </span>
+                                ))}
+                              </div>
+                          ) : (
+                              <span className={`text-[9px] uppercase tracking-wider font-bold truncate inline-block mt-1 w-fit rounded px-1.5 py-0.5 ${getRoleBadge(user.role)}`}>
+                                  {String(user.role || 'No Role')}
+                              </span>
+                          )}
                       </div>
                    </div>
                    <button className="text-slate-400 opacity-0 group-hover:opacity-100 hover:text-indigo-600 transition-all p-2 rounded-lg hover:bg-slate-200">

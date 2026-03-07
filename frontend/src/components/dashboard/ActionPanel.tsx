@@ -57,7 +57,16 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         },
       ]
     };
-    return actions[userRole || ""] || [];
+    
+    const userRoleStr = String(userRole || "").toLowerCase();
+    const allowedActions = new Map();
+    Object.entries(actions).forEach(([role, roleActions]) => {
+         if (userRoleStr.includes(role)) {
+             roleActions.forEach(action => allowedActions.set(action.id, action));
+         }
+    });
+
+    return Array.from(allowedActions.values());
   };
 
   const handleAction = (actionId: string) => {

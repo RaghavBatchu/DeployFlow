@@ -5,9 +5,10 @@ interface SidebarProps {
   user: User | null;
   onLogout: () => void;
   connected: boolean;
+  onShowTeam?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected }) => {
+const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected, onShowTeam }) => {
   return (
     <div className="w-[240px] bg-[#10101a] flex flex-col h-full shrink-0 text-white font-sans border-r border-[#1e1e2d]">
       
@@ -55,9 +56,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected }) => {
           <span className="text-[15px] font-medium">Pipeline</span>
         </a>
 
-        <a
-          href="#"
-          className="flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
+        <button
+          onClick={() => onShowTeam && onShowTeam()}
+          className="w-full flex items-center px-4 py-3 border-l-4 border-transparent hover:bg-[#151522] rounded-r-md transition-colors"
         >
           <svg
             className="w-5 h-5 mr-3 text-white"
@@ -78,8 +79,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected }) => {
               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
             />
           </svg>
-          <span className="text-[15px] font-medium">Team</span>
-        </a>
+          <span className="text-[15px] font-medium text-white text-left flex-1">Team</span>
+        </button>
       </nav>
 
       {/* Bottom Area */}
@@ -94,9 +95,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout, connected }) => {
             <span className="text-[15px] font-bold truncate leading-tight">
               {user?.name || "Raghavendra Batchu"}
             </span>
-            <span className="text-[11px] uppercase tracking-widest font-bold text-[#9ca3af] mt-0.5">
-              {user?.role || "DEVELOPER"}
-            </span>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {['developer', 'qa', 'devops', 'manager'].filter(r => String(user?.role || 'developer').toLowerCase().includes(r)).map(r => (
+                <span key={r} className="text-[9px] px-1.5 py-0.5 rounded-sm bg-[#2a2a3a] uppercase tracking-widest font-bold text-[#9ca3af]">
+                  {r}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

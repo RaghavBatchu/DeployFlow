@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100),
-    email VARCHAR(255) UNIQUE,
+    email VARCHAR(255),
     password_hash VARCHAR(255),
     role VARCHAR(50), -- 'developer' | 'qa' | 'devops' | 'manager'
     created_at TIMESTAMP DEFAULT NOW()
