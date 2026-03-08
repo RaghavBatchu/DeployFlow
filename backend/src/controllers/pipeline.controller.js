@@ -9,6 +9,7 @@ const {
 const { addLog, getLogsByPipelineId } = require("../models/log.model");
 const { getRolesForUser } = require("../models/role.model");
 const { getUserById } = require("../models/user.model");
+const { sendCompletionEmail } = require("../services/email.service");
 
 const STAGE_CONFIG = {
   build: {
@@ -72,6 +73,12 @@ const enrichPipelineWithNames = async (row) => {
     qa_name: qa?.name ?? null,
     devops_name: devops?.name ?? null,
     manager_name: manager?.name ?? null,
+
+    developer_email: dev?.email ?? null,
+    qa_email: qa?.email ?? null,
+    devops_email: devops?.email ?? null,
+    manager_email: manager?.email ?? null,
+
     build_user: dev?.name ?? null,
     test_user: qa?.name ?? null,
     deploy_user: devops?.name ?? null,
@@ -279,6 +286,18 @@ const performAction = async (req, res) => {
           log: { ...completionLog, user_name: userName },
         });
       }
+
+      // Dispatch Email Notification to Team Members asynchronously
+      const teamEmails = [
+        enriched.developer_email,
+        enriched.qa_email,
+        enriched.devops_email,
+        enriched.manager_email
+      ].filter(Boolean); // removes null/undefined
+
+      sendCompletionEmail(teamEmails, enriched, { name: userName }).catch(err => {
+        console.error("Non-blocking error dispatching completion emails:", err);
+      });
     }
 
     res.json({
