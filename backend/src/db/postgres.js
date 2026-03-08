@@ -1,7 +1,14 @@
 const { Pool } = require("pg");
 const path = require("path");
-// Ensure it resolves to the root DeploymentFlow/.env
-require("dotenv").config({ path: path.join(__dirname, "../../../.env") });
+const fs = require("fs");
+
+const envPath = path.join(__dirname, "../../../.env");
+if (fs.existsSync(envPath)) {
+    require("dotenv").config({ path: envPath });
+} else {
+    // Fallback to standard process.env mapping
+    require("dotenv").config();
+}
 
 const pool = new Pool({
     host: process.env.DB_HOST,
