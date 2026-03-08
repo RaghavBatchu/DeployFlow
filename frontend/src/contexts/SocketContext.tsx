@@ -38,7 +38,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [socket, connected]);
 
   useEffect(() => {
-    const newSocket = io("http://localhost:5000", {
+    // When hosted via Docker/Nginx, Socket.io requests are routed using window.location.origin
+    // Nginx will proxy anything sent to `/socket.io/` toward `http://backend:5000`
+    const SOCKET_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? window.location.origin : "http://localhost:5000");
+    const newSocket = io(SOCKET_URL, {
       transports: ["websocket"],
     });
 
