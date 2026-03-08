@@ -25,8 +25,22 @@ export default function Navbar() {
       }}
     >
       {/* Logo */}
-      <Link to="/" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-        <div style={{ width: 32, height: 32, borderRadius: "8px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: "14px" }}>D</div>
+      <Link to="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+        <div style={{ width: 32, height: 32, borderRadius: "8px", background: "#9333ea", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(147,51,234,0.3)" }}>
+          <svg
+            style={{ width: "20px", height: "20px", color: "white" }}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 12 12 17 22 12"></polyline>
+            <polyline points="2 17 12 22 22 17"></polyline>
+          </svg>
+        </div>
         <span style={{ fontWeight: 800, color: "#111", fontSize: "17px", letterSpacing: "-0.3px" }}>DeployFlow</span>
       </Link>
 

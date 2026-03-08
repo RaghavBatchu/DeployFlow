@@ -1,6 +1,6 @@
 // When running in production (Docker Nginx), we use relative paths so Nginx can proxy `/api` back to the backend.
-// In local dev, it falls back to `http://localhost:5000/api` unless specified otherwise.
-const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/api" : "http://localhost:5000/api");
+// In local dev, it falls back to `http://localhost:5001/api` unless specified otherwise.
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/api" : "http://localhost:5001/api");
 
 export interface User {
   id: number;

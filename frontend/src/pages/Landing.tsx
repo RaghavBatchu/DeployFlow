@@ -202,7 +202,21 @@ export default function Landing() {
             {/* Brand col */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1rem" }}>
-                <div style={{ width: 36, height: 36, borderRadius: "10px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 900, fontSize: "16px" }}>D</div>
+                <div style={{ width: 36, height: 36, borderRadius: "10px", background: "#9333ea", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(147,51,234,0.3)" }}>
+                  <svg
+                    style={{ width: "20px", height: "20px", color: "white" }}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                  </svg>
+                </div>
                 <span style={{ fontWeight: 800, color: "#fff", fontSize: "18px", letterSpacing: "-0.3px" }}>DeployFlow</span>
               </div>
               <p style={{ color: "#9ca3af", fontSize: "14px", lineHeight: 1.75, maxWidth: "280px" }}>
