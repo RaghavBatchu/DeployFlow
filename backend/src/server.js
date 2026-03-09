@@ -34,8 +34,20 @@ app.use("/api/logs", require("./routes/log.routes"));
 app.use("/api/users", require("./routes/user.routes"));
 app.use("/api/auth", require("./routes/auth.routes"));
 
+const promClient = require("prom-client");
+
+// Collect default Node.js metrics (CPU, RAM, Event Loop)
+const collectDefaultMetrics = promClient.collectDefaultMetrics;
+collectDefaultMetrics({ prefix: 'deployflow_' });
+
 app.get("/", (req, res) => {
   res.send("DeployFlow API running");
+});
+
+// Prometheus metrics endpoint
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", promClient.register.contentType);
+  res.send(await promClient.register.metrics());
 });
 
 const PORT = process.env.PORT || 5000;
