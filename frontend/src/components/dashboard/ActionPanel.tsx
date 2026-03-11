@@ -72,15 +72,15 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
 
   return (
     <div className="flex flex-col w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-bold text-slate-900 capitalize">Pipeline Controls</h3>
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-base font-bold text-slate-900">Pipeline Controls</h3>
         <div
-          className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-xs font-bold tracking-wider uppercase ${
+          className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${
             status === "completed"
-              ? "bg-emerald-100 text-emerald-700"
+              ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
               : status === "in-progress"
-                ? "bg-blue-100 text-blue-700"
-                : "bg-slate-100 text-slate-500"
+                ? "bg-blue-50 text-blue-600 border border-blue-200"
+                : "bg-slate-50 text-slate-500 border border-slate-200"
           }`}
         >
           {status === "in-progress" && (
@@ -98,8 +98,9 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
            </p>
         </div>
       ) : (
-        <div className="text-center bg-slate-50 rounded-xl p-6 border border-slate-200 border-dashed">
-          <p className="text-base font-medium text-slate-500">
+        <div className="text-center bg-slate-50 rounded-xl p-8 border border-slate-200 border-dashed">
+          <svg className="w-8 h-8 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <p className="text-sm font-medium text-slate-400 leading-relaxed">
             {pipeline
               ? "No action available for you on this stage. Wait for your turn or for the pipeline to progress."
               : "Start a pipeline to see actions."}

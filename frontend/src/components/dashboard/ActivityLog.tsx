@@ -45,38 +45,39 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs }) => {
 
   return (
     <div className="flex flex-col w-full h-full pb-6">
-      <div className="flex items-center justify-between mb-8 shrink-0">
-        <h3 className="text-lg font-bold text-slate-900 capitalize">Pipeline Events</h3>
-        <button className="text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 transition-colors px-3 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg">
+      <div className="flex items-center justify-between mb-5 shrink-0">
+        <h3 className="text-base font-bold text-slate-900">Pipeline Events</h3>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full">
           Live Feed
-        </button>
+        </span>
       </div>
 
       {/* Vertical Timeline */}
-      <div className="flex-1 overflow-y-auto relative pl-4 pr-2 group/timeline scrollbar-hide">
-        <div className="absolute left-[35px] top-6 bottom-8 w-[2px] bg-slate-200 rounded-full group-hover/timeline:bg-slate-300 transition-colors z-0"></div>
+      <div className="flex-1 overflow-y-auto relative pl-5 pr-2 scrollbar-hide">
+        <div className="absolute left-[38px] top-6 bottom-8 w-[2px] bg-gradient-to-b from-slate-200 to-transparent rounded-full z-0"></div>
         
         {logs.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-sm font-medium text-slate-400">Waiting for pipeline events...</p>
           </div>
         ) : (
-          <div className="space-y-8 relative z-10 pt-2 pb-6">
+          <div className="space-y-1 relative z-10 pt-2 pb-6">
               {logs.map((log: LogEntry, index: number) => (
                 <div
                   key={log.id || `${log.timestamp}-${index}`}
                   className="flex items-start animate-fadeIn relative"
+                  style={{ padding: '12px 0', borderBottom: index < logs.length - 1 ? '1px solid #f1f5f9' : 'none' }}
                 >
                   {/* Avatar Icon Node */}
-                  <div className="mr-5 mt-0.5 w-11 h-11 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center shrink-0 shadow-sm z-10 overflow-hidden relative group/node">
-                     <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${log.user_name ?? log.id ?? "user"}`} alt="avatar" className="opacity-100 w-full h-full object-cover"/>
+                  <div className="mr-4 mt-0.5 w-11 h-11 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center shrink-0 shadow-sm z-10 overflow-hidden relative">
+                     <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${log.user_name ?? log.id ?? "user"}`} alt="avatar" className="w-full h-full object-cover"/>
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0 pt-1">
-                     <div className="flex items-center space-x-2 text-sm text-slate-600 leading-snug">
-                        <span className="font-bold text-slate-900">{log.user_name ?? "System"}</span>
-                        <span>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                     <div className="flex flex-wrap items-baseline gap-x-2 text-sm text-slate-600 leading-relaxed">
+                        <span className="font-bold text-slate-800">{log.user_name ?? "System"}</span>
+                        <span className="text-slate-500">
                             {log.action.includes('error') || log.action.includes('failed') ? (
                                 <span className="text-rose-600 font-medium">Encountered an error: {parseAction(log.action)}</span>
                             ) : (
@@ -85,11 +86,11 @@ const ActivityLog: React.FC<ActivityLogProps> = ({ logs }) => {
                         </span>
                      </div>
                      {log.comment && (
-                       <div className="mt-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg p-3 italic shadow-sm">
+                       <div className="mt-2.5 text-sm text-slate-600 bg-slate-50 border border-slate-100 rounded-lg italic" style={{ padding: '10px 14px' }}>
                          "{log.comment}"
                        </div>
                      )}
-                     <span className="block mt-2 text-xs font-semibold text-slate-400">
+                     <span className="block mt-2 text-xs font-medium text-slate-400">
                          {formatTimestamp(log.timestamp)}
                      </span>
                   </div>
