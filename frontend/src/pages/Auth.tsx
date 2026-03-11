@@ -45,42 +45,6 @@ const EyeOff = () => (
   </svg>
 );
 
-/* ─── Toggle ─────────────────────────────────────────────────── */
-function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        width: 44,
-        height: 24,
-        borderRadius: 999,
-        border: "none",
-        cursor: "pointer",
-        background: on ? "#7c3aed" : "#d1d5db",
-        transition: "background 0.2s",
-        flexShrink: 0,
-      }}
-    >
-      <span
-        style={{
-          position: "absolute",
-          left: on ? 22 : 2,
-          width: 20,
-          height: 20,
-          borderRadius: "50%",
-          background: "#fff",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
-          transition: "left 0.2s",
-        }}
-      />
-    </button>
-  );
-}
-
 /* ─── Field component ────────────────────────────────────────── */
 function Field({
   id,
@@ -90,6 +54,7 @@ function Field({
   onChange,
   autoComplete,
   suffix,
+  placeholder,
 }: {
   id: string;
   label: string;
@@ -98,6 +63,7 @@ function Field({
   onChange: (v: string) => void;
   autoComplete?: string;
   suffix?: React.ReactNode;
+  placeholder?: string;
 }) {
   const [focused, setFocused] = useState(false);
   const raised = focused || value.length > 0;
@@ -126,6 +92,7 @@ function Field({
         type={type}
         value={value}
         autoComplete={autoComplete}
+        placeholder={focused ? placeholder : ""}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
@@ -178,10 +145,10 @@ export default function Auth() {
   const [name, setName] = useState("");
   const [roles, setRoles] = useState<Role[]>(["developer"]);
   const [showPw, setShowPw] = useState(false);
-  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -197,17 +164,33 @@ export default function Auth() {
     return true;
   };
 
+  const validatePassword = (password: string) => {
+    if (!password) {
+      setPasswordError("Password is required");
+      return false;
+    }
+    if (password.length < 4) {
+      setPasswordError("Password must be at least 4 characters.");
+      return false;
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setPasswordError("Password must include at least one special character.");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!validateEmail(email)) return;
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    if (!isEmailValid || !isPasswordValid) return;
+
     if (!name.trim()) {
       setError("Name is required");
-      return;
-    }
-    if (!password) {
-      setError("Password is required");
       return;
     }
     if (!roles.length) {
@@ -236,11 +219,9 @@ export default function Auth() {
     e.preventDefault();
     setError("");
 
-    if (!validateEmail(email)) return;
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    if (!isEmailValid || !isPasswordValid) return;
 
     setLoading(true);
     try {
@@ -458,11 +439,17 @@ export default function Auth() {
                   ? "Create your account"
                   : "Welcome back to DeployFlow"}
               </h1>
-              <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 28 }}>
+              <p style={{ fontSize: 14, color: "#6b7280", marginBottom: 20 }}>
                 {isRegister
                   ? "Pick your role and join a live CI/CD simulation."
                   : "Sign in to continue your pipeline simulation."}
               </p>
+
+              {error && (
+                <div style={{ background: "#fee2e2", color: "#b91c1c", padding: "10px 14px", borderRadius: 8, fontSize: 13, marginBottom: 14 }}>
+                  {error}
+                </div>
+              )}
 
               {/* Form */}
               <form
@@ -489,6 +476,7 @@ export default function Auth() {
                     if (emailError) validateEmail(value);
                   }}
                   autoComplete="email"
+                  placeholder="name@example.com"
                 />
                 {emailError && (
                   <p
@@ -508,10 +496,14 @@ export default function Auth() {
                   label="Password"
                   type={showPw ? "text" : "password"}
                   value={password}
-                  onChange={setPassword}
+                  onChange={(value) => {
+                    setPassword(value);
+                    if (passwordError) validatePassword(value);
+                  }}
                   autoComplete={
                     isRegister ? "new-password" : "current-password"
                   }
+                  placeholder="Min 4 chars, 1 special char"
                   suffix={
                     <button
                       type="button"
@@ -528,6 +520,18 @@ export default function Auth() {
                     </button>
                   }
                 />
+                {passwordError && (
+                  <p
+                    style={{
+                      color: "#ef4444",
+                      fontSize: 12,
+                      marginTop: -8,
+                      marginBottom: 4,
+                    }}
+                  >
+                    {passwordError}
+                  </p>
+                )}
 
                 {/* Role picker */}
                 {isRegister && (
@@ -602,46 +606,29 @@ export default function Auth() {
                   </div>
                 )}
 
-                {/* Forgot password + Remember (login) */}
+                {/* Forgot password (login) */}
                 {!isRegister && (
-                  <>
-                    <div
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginTop: -4,
+                    }}
+                  >
+                    <button
+                      type="button"
                       style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        marginTop: -4,
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "#7c3aed",
                       }}
                     >
-                      <button
-                        type="button"
-                        style={{
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: "#7c3aed",
-                        }}
-                      >
-                        Forgot password?
-                      </button>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span style={{ fontSize: 14, color: "#6b7280" }}>
-                        Remember sign in details
-                      </span>
-                      <Toggle
-                        on={remember}
-                        onToggle={() => setRemember((r) => !r)}
-                      />
-                    </div>
-                  </>
+                      Forgot password?
+                    </button>
+                  </div>
                 )}
 
                 {/* Primary CTA */}

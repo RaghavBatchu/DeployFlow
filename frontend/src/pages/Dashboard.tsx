@@ -129,7 +129,7 @@ export default function Dashboard() {
         onLogout={handleLogout} 
         connected={connected} 
         onShowTeam={handleShowTeam} 
-        onSelectPipeline={(id) => {
+        onSelectPipeline={(id: string | number) => {
           emitAction("refresh_pipeline", { pipelineId: id });
           emitAction("get_logs", { pipelineId: id });
         }}
