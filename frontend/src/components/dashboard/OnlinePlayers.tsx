@@ -20,9 +20,9 @@ const OnlinePlayers: React.FC<OnlinePlayersProps> = ({ users, currentUser }) => 
 
   return (
     <div className="flex flex-col w-full">
-       <div className="flex items-center justify-between mb-6">
-         <h3 className="text-lg font-bold text-slate-900 capitalize">Team Online</h3>
-         <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200 shadow-sm flex items-center gap-2">
+       <div className="flex items-center justify-between mb-5">
+         <h3 className="text-base font-bold text-slate-900">Team Online</h3>
+         <span className="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-full border border-emerald-200 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             {users?.length || 0} Active
          </span>
@@ -33,13 +33,13 @@ const OnlinePlayers: React.FC<OnlinePlayersProps> = ({ users, currentUser }) => 
             <p className="text-sm font-medium text-slate-500 text-center py-4 bg-slate-50 rounded-xl border border-slate-200 border-dashed">No team members online</p>
          ) : (
             users.map((user, index) => (
-                <div key={user.id || index} className="flex items-center justify-between group p-3 hover:bg-slate-50 rounded-xl transition-colors -mx-3">
-                   <div className="flex items-center space-x-4">
+                <div key={user.id || index} className="flex items-center justify-between group rounded-xl transition-colors" style={{ padding: '12px', margin: '0 -12px' }}>
+                   <div className="flex items-center space-x-3.5">
                       <div className="relative shrink-0">
-                          <div className="w-10 h-10 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center text-sm font-bold text-slate-600 shadow-sm relative z-10 overflow-hidden">
+                          <div className="w-11 h-11 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 relative z-10 overflow-hidden">
                               <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt="avatar" />
                           </div>
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white z-20"></div>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white z-20"></div>
                       </div>
                       <div className="flex flex-col">
                           <div className="flex items-center space-x-2">
@@ -47,9 +47,9 @@ const OnlinePlayers: React.FC<OnlinePlayersProps> = ({ users, currentUser }) => 
                               {user.id === currentUser?.id && <span className="text-[11px] font-bold text-slate-500 uppercase">(You)</span>}
                           </div>
                           {['developer', 'qa', 'devops', 'manager'].some(r => String(user.role || '').toLowerCase().includes(r)) ? (
-                              <div className="flex flex-wrap gap-1 mt-1">
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
                                 {['developer', 'qa', 'devops', 'manager'].filter(r => String(user.role || '').toLowerCase().includes(r)).map(r => (
-                                  <span key={r} className={`text-[9px] uppercase tracking-wider font-bold rounded px-1.5 py-0.5 ${getRoleBadge(r)}`}>
+                                  <span key={r} className={`text-[10px] uppercase tracking-wider font-bold rounded-md px-2 py-0.5 ${getRoleBadge(r)}`}>
                                       {r}
                                   </span>
                                 ))}

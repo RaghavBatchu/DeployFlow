@@ -5,10 +5,10 @@ import Navbar from "../components/Navbar";
 import { auth } from "../services/api";
 
 const roles = [
-  { icon: "👨‍💻", title: "Developer", desc: "Push code to trigger the build pipeline and kick off the workflow.", accent: "#7c3aed", bg: "linear-gradient(135deg, #f5f3ff, #ede9fe)", border: "#ddd6fe" },
-  { icon: "🧪", title: "QA Engineer", desc: "Run automated tests and validate the build before deployment.", accent: "#2563eb", bg: "linear-gradient(135deg, #eff6ff, #dbeafe)", border: "#bfdbfe" },
-  { icon: "⚙️", title: "DevOps", desc: "Deploy the validated application to production infrastructure.", accent: "#0e7490", bg: "linear-gradient(135deg, #ecfeff, #cffafe)", border: "#a5f3fc" },
-  { icon: "👔", title: "Manager", desc: "Approve the final release and complete the deployment pipeline.", accent: "#059669", bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)", border: "#6ee7b7" },
+  { icon: "👨‍💻", title: "Developer", desc: "Push code to trigger the build pipeline and kick off the workflow.", accent: "#4ade80", bg: "linear-gradient(135deg, #020617, #0f172a)", border: "#1e293b" },
+  { icon: "🧪", title: "QA Engineer", desc: "Run automated tests and validate the build before deployment.", accent: "#38bdf8", bg: "linear-gradient(135deg, #020617, #0f172a)", border: "#1e293b" },
+  { icon: "⚙️", title: "DevOps", desc: "Deploy the validated application to production infrastructure.", accent: "#22d3ee", bg: "linear-gradient(135deg, #020617, #0f172a)", border: "#1e293b" },
+  { icon: "👔", title: "Manager", desc: "Approve the final release and complete the deployment pipeline.", accent: "#22c55e", bg: "linear-gradient(135deg, #020617, #0f172a)", border: "#1e293b" },
 ];
 
 type FooterLink = { label: string; href: string; external?: boolean };
@@ -34,45 +34,46 @@ const footerLinks: FooterLinks = {
 
 export default function Landing() {
   return (
-    <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#020617", fontFamily: "'Inter', sans-serif" }}>
       <Navbar />
 
       {/* ═══ HERO ═══ */}
       <section style={{
         position: "relative", overflow: "hidden",
         padding: "8rem 2rem 6rem",
-        background: "linear-gradient(160deg, #faf5ff 0%, #eff6ff 40%, #f0fdf4 100%)"
+        background: "linear-gradient(160deg, #020617 0%, #0f172a 40%, #020617 100%)"
       }}>
         {/* Decorative orbs */}
-        <div style={{ position: "absolute", top: "-80px", left: "-80px", width: "400px", height: "400px", borderRadius: "50%", background: "radial-gradient(circle, rgba(124,58,237,0.12), transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: "-60px", right: "-60px", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.1), transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", top: "-80px", left: "-80px", width: "400px", height: "400px", borderRadius: "50%", background: "radial-gradient(circle, rgba(34,197,94,0.15), transparent 70%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: "-60px", right: "-60px", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(74,222,128,0.1), transparent 70%)", pointerEvents: "none" }} />
 
         <div style={{ maxWidth: "1200px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "center", position: "relative" }}>
           {/* Left */}
           <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(124,58,237,0.12)", color: "#6d28d9", fontSize: "12px", fontWeight: 700, padding: "6px 16px", borderRadius: "999px", marginBottom: "1.5rem", border: "1px solid rgba(124,58,237,0.2)" }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#7c3aed", display: "inline-block" }} />
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(34,197,94,0.12)", color: "#4ade80", fontSize: "12px", fontWeight: 700, padding: "6px 16px", borderRadius: "999px", marginBottom: "1.5rem", border: "1px solid rgba(34,197,94,0.25)" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
               Real-time DevOps Simulator
             </div>
 
-            <h1 style={{ fontSize: "3.75rem", fontWeight: 900, lineHeight: 1.08, color: "#0f0f0f", marginBottom: "1.25rem", letterSpacing: "-1px" }}>
-              <span style={{ background: "linear-gradient(135deg, #7c3aed 0%, #2563eb 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Simulate</span>{" "}
-              the DevOps<br />Lifecycle
+            <h1 style={{ fontSize: "3.75rem", fontWeight: 900, lineHeight: 1.08, color: "#f8fafc", marginBottom: "1.25rem", letterSpacing: "-1px" }}>
+              <span style={{ background: "linear-gradient(135deg, #22c55e 0%, #4ade80 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>Simulate</span>{" "}
+              the DevOps<br />
+              Lifecycle
             </h1>
 
-            <p style={{ color: "#6b7280", fontSize: "1.1rem", lineHeight: 1.75, marginBottom: "2rem", maxWidth: "420px" }}>
+            <p style={{ color: "#94a3b8", fontSize: "1.1rem", lineHeight: 1.75, marginBottom: "2rem", maxWidth: "420px" }}>
               Play as a Developer, QA, DevOps Engineer, or Manager. Collaborate in real-time to move your project through a live CI/CD pipeline.
             </p>
 
             <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
-              <Link to={auth.isAuthenticated() ? "/dashboard" : "/auth?tab=register"} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg, #7c3aed, #2563eb)", color: "#fff", fontWeight: 700, padding: "14px 28px", borderRadius: "999px", fontSize: "15px", boxShadow: "0 8px 28px rgba(124,58,237,0.35)", textDecoration: "none", transition: "opacity 0.2s" }}>
+              <Link to={auth.isAuthenticated() ? "/dashboard" : "/auth?tab=register"} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg, #22c55e, #4ade80)", color: "#fff", fontWeight: 700, padding: "14px 28px", borderRadius: "999px", fontSize: "15px", boxShadow: "0 8px 28px rgba(34,197,94,0.35)", textDecoration: "none", transition: "opacity 0.2s" }}>
                 {auth.isAuthenticated() ? "→ Go to Dashboard" : "→ Start Simulation"}
               </Link>
-              <a href="#how-it-works" style={{ display: "inline-flex", alignItems: "center", color: "#374151", fontWeight: 600, padding: "14px 24px", borderRadius: "999px", border: "1px solid #d1d5db", fontSize: "15px", textDecoration: "none", background: "rgba(255,255,255,0.7)" }}>
+              <a href="#how-it-works" style={{ display: "inline-flex", alignItems: "center", color: "#f8fafc", fontWeight: 600, padding: "14px 24px", borderRadius: "999px", border: "1px solid #1e293b", fontSize: "15px", textDecoration: "none", background: "rgba(15,23,42,0.7)" }}>
                 How it Works
               </a>
             </div>
-            <div style={{ display: "flex", gap: "1.5rem", color: "#9ca3af", fontSize: "13px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "1.5rem", color: "#64748b", fontSize: "13px", flexWrap: "wrap" }}>
               <span>✓ No setup required</span>
               <span>✓ Real-time multiplayer</span>
               <span>✓ Free to play</span>
@@ -81,13 +82,13 @@ export default function Landing() {
 
           {/* Right: Pipeline Card */}
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.2 }} style={{ position: "relative" }}>
-            <div style={{ background: "#fff", borderRadius: "24px", boxShadow: "0 24px 64px rgba(124,58,237,0.12), 0 4px 16px rgba(0,0,0,0.05)", border: "1px solid rgba(124,58,237,0.1)", padding: "2rem", animation: "float 4s ease-in-out infinite" }}>
+            <div style={{ background: "#020617", borderRadius: "24px", boxShadow: "0 24px 64px rgba(34,197,94,0.08), 0 4px 16px rgba(0,0,0,0.3)", border: "1px solid #1e293b", padding: "2rem", animation: "float 4s ease-in-out infinite" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
                 <div>
-                  <p style={{ fontSize: "11px", color: "#9ca3af", fontWeight: 700, letterSpacing: "0.1em", marginBottom: "4px" }}>ACTIVE PIPELINE</p>
-                  <p style={{ fontSize: "16px", fontWeight: 800, color: "#111" }}>DeployFlow Sprint #12</p>
+                  <p style={{ fontSize: "11px", color: "#64748b", fontWeight: 700, letterSpacing: "0.1em", marginBottom: "4px" }}>ACTIVE PIPELINE</p>
+                  <p style={{ fontSize: "16px", fontWeight: 800, color: "#f8fafc" }}>DeployFlow Sprint #12</p>
                 </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "#ecfdf5", color: "#059669", fontSize: "12px", fontWeight: 700, padding: "6px 14px", borderRadius: "999px", border: "1px solid #a7f3d0" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(34,197,94,0.1)", color: "#4ade80", fontSize: "12px", fontWeight: 700, padding: "6px 14px", borderRadius: "999px", border: "1px solid rgba(34,197,94,0.25)" }}>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", display: "inline-block" }} />
                   Live
                 </div>
@@ -97,17 +98,17 @@ export default function Landing() {
 
               <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: "10px" }}>
                 {[
-                  { user: "Raghav", role: "Developer", action: "pushed code to main", bg: "rgba(124,58,237,0.08)", color: "#6d28d9" },
-                  { user: "Ankit", role: "QA", action: "started test suite", bg: "rgba(37,99,235,0.08)", color: "#1d4ed8" },
-                  { user: "Neha", role: "DevOps", action: "deploying to production…", bg: "rgba(14,116,144,0.08)", color: "#0e7490" },
+                  { user: "Raghav", role: "Developer", action: "pushed code to main", bg: "rgba(74,222,128,0.1)", color: "#4ade80" },
+                  { user: "Ankit", role: "QA", action: "started test suite", bg: "rgba(56,189,248,0.1)", color: "#38bdf8" },
+                  { user: "Neha", role: "DevOps", action: "deploying to production…", bg: "rgba(34,211,238,0.1)", color: "#22d3ee" },
                 ].map((item, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.6 + i * 0.3 }}
                     style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "13px" }}>
-                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "linear-gradient(135deg, #7c3aed22, #2563eb22)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#7c3aed", fontSize: "11px", flexShrink: 0, border: "1px solid #ddd6fe" }}>
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "rgba(34,197,94,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#4ade80", fontSize: "11px", flexShrink: 0, border: "1px solid rgba(34,197,94,0.25)" }}>
                       {item.user[0]}
                     </div>
                     <span style={{ background: item.bg, color: item.color, fontSize: "11px", fontWeight: 700, padding: "3px 10px", borderRadius: "999px", flexShrink: 0 }}>{item.role}</span>
-                    <span style={{ color: "#6b7280", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.action}</span>
+                    <span style={{ color: "#94a3b8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.action}</span>
                   </motion.div>
                 ))}
               </div>
@@ -115,20 +116,20 @@ export default function Landing() {
 
             {/* Floating badges */}
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.2, type: "spring" }}
-              style={{ position: "absolute", top: "-16px", right: "-16px", background: "linear-gradient(135deg, #fef3c7, #fff7ed)", borderRadius: "16px", boxShadow: "0 8px 24px rgba(245,158,11,0.2)", border: "1px solid #fde68a", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
+              style={{ position: "absolute", top: "-16px", right: "-16px", background: "linear-gradient(135deg, #0f172a, #1e293b)", borderRadius: "16px", boxShadow: "0 8px 24px rgba(34,197,94,0.15)", border: "1px solid #1e293b", padding: "10px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
               <span style={{ fontSize: "20px" }}>🎉</span>
               <div>
-                <p style={{ fontWeight: 800, color: "#92400e", fontSize: "13px" }}>Pipeline Complete!</p>
-                <p style={{ color: "#b45309", fontSize: "12px" }}>Deployed in 4 turns</p>
+                <p style={{ fontWeight: 800, color: "#4ade80", fontSize: "13px" }}>Pipeline Complete!</p>
+                <p style={{ color: "#94a3b8", fontSize: "12px" }}>Deployed in 4 turns</p>
               </div>
             </motion.div>
 
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 1.4, type: "spring" }}
-              style={{ position: "absolute", bottom: "-16px", left: "-16px", background: "#fff", borderRadius: "16px", boxShadow: "0 8px 24px rgba(0,0,0,0.08)", border: "1px solid #f3f4f6", padding: "10px 16px" }}>
-              <p style={{ color: "#9ca3af", fontSize: "11px", fontWeight: 600, marginBottom: "6px" }}>Online Players</p>
+              style={{ position: "absolute", bottom: "-16px", left: "-16px", background: "#0f172a", borderRadius: "16px", boxShadow: "0 8px 24px rgba(0,0,0,0.3)", border: "1px solid #1e293b", padding: "10px 16px" }}>
+              <p style={{ color: "#64748b", fontSize: "11px", fontWeight: 600, marginBottom: "6px" }}>Online Players</p>
               <div style={{ display: "flex" }}>
                 {["R", "A", "N", "K"].map((l, i) => (
-                  <div key={i} style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradient(135deg, ${["#7c3aed","#2563eb","#0891b2","#059669"][i]}, ${["#a855f7","#3b82f6","#06b6d4","#10b981"][i]})`, border: "2px solid white", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "11px", fontWeight: 800, marginRight: i < 3 ? "-6px" : 0 }}>{l}</div>
+                   <div key={i} style={{ width: 28, height: 28, borderRadius: "50%", background: `linear-gradient(135deg, ${["#22c55e","#38bdf8","#22d3ee","#4ade80"][i]}, ${["#4ade80","#7dd3fc","#67e8f9","#86efac"][i]})`, border: "2px solid #0f172a", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: "11px", fontWeight: 800, marginRight: i < 3 ? "-6px" : 0 }}>{l}</div>
                 ))}
               </div>
             </motion.div>
@@ -137,12 +138,12 @@ export default function Landing() {
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section id="how-it-works" style={{ padding: "8rem 2rem", background: "#fff", borderTop: "1px solid #f3f4f6" }}>
+      <section id="how-it-works" style={{ padding: "8rem 2rem", background: "#0f172a", borderTop: "1px solid #1e293b" }}>
         <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ textAlign: "center", marginBottom: "3.5rem" }}>
-            <p style={{ fontSize: "20px", fontWeight: 800, color: "#7c3aed", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>How it works</p>
-            <h2 style={{ fontSize: "3.5rem", fontWeight: 900, color: "#0f0f0f", marginBottom: "1.25rem", letterSpacing: "-1px" }}>Four roles. One pipeline.<br/>Zero meetings.</h2>
-            <p style={{ color: "#6b7280", maxWidth: "520px", margin: "0 auto", lineHeight: 1.8, fontSize: "17px" }}>Each player picks a role and performs exactly one action to advance the shared deployment pipeline.</p>
+            <p style={{ fontSize: "20px", fontWeight: 800, color: "#22c55e", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "16px" }}>How it works</p>
+            <h2 style={{ fontSize: "3.5rem", fontWeight: 900, color: "#f8fafc", marginBottom: "1.25rem", letterSpacing: "-1px" }}>Four roles. One pipeline.<br/>Zero meetings.</h2>
+            <p style={{ color: "#94a3b8", maxWidth: "520px", margin: "0 auto", lineHeight: 1.8, fontSize: "17px" }}>Each player picks a role and performs exactly one action to advance the shared deployment pipeline.</p>
           </motion.div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1.5rem" }}>
@@ -152,8 +153,8 @@ export default function Landing() {
                 whileHover={{ y: -10, scale: 1.02, transition: { duration: 0.2 } }}
                 style={{ background: role.bg, border: `1px solid ${role.border}`, borderRadius: "24px", padding: "2.5rem 2rem", cursor: "default" }}>
                 <div style={{ fontSize: "3.5rem", marginBottom: "1.25rem" }}>{role.icon}</div>
-                <div style={{ display: "inline-block", background: "#fff", color: role.accent, fontSize: "12px", fontWeight: 800, padding: "5px 14px", borderRadius: "999px", marginBottom: "1rem", border: `1px solid ${role.border}` }}>{role.title}</div>
-                <p style={{ color: "#374151", fontSize: "15px", lineHeight: 1.75 }}>{role.desc}</p>
+                <div style={{ display: "inline-block", background: "rgba(255,255,255,0.05)", color: role.accent, fontSize: "12px", fontWeight: 800, padding: "5px 14px", borderRadius: "999px", marginBottom: "1rem", border: `1px solid ${role.border}` }}>{role.title}</div>
+                <p style={{ color: "#94a3b8", fontSize: "15px", lineHeight: 1.75 }}>{role.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -161,7 +162,7 @@ export default function Landing() {
       </section>
 
       {/* ═══ STATS STRIP ═══ */}
-      <section style={{ padding: "3rem 2rem", background: "linear-gradient(90deg, #f5f3ff, #eff6ff, #ecfeff, #ecfdf5)" }}>
+      <section style={{ padding: "3rem 2rem", background: "#020617", borderTop: "1px solid #1e293b", borderBottom: "1px solid #1e293b" }}>
         <div style={{ maxWidth: "900px", margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "2rem", textAlign: "center" }}>
           {[
             { num: "4", label: "Roles Supported" },
@@ -170,24 +171,24 @@ export default function Landing() {
             { num: "∞", label: "Games Playable" },
           ].map((s) => (
             <div key={s.num}>
-              <p style={{ fontSize: "2.25rem", fontWeight: 900, background: "linear-gradient(135deg, #7c3aed, #2563eb)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{s.num}</p>
-              <p style={{ color: "#6b7280", fontSize: "13px", fontWeight: 600, marginTop: "4px" }}>{s.label}</p>
+              <p style={{ fontSize: "2.25rem", fontWeight: 900, background: "linear-gradient(135deg, #22c55e, #4ade80)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", color: "transparent" }}>{s.num}</p>
+              <p style={{ color: "#64748b", fontSize: "13px", fontWeight: 600, marginTop: "4px" }}>{s.label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ═══ CTA ═══ */}
-      <section style={{ padding: "6rem 2rem", background: "#fff" }}>
+      <section style={{ padding: "6rem 2rem", background: "#0f172a" }}>
         <motion.div initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-          style={{ maxWidth: "820px", margin: "0 auto", background: "linear-gradient(135deg, #7c3aed 0%, #2563eb 60%, #0891b2 100%)", borderRadius: "28px", padding: "4.5rem 3rem", textAlign: "center", boxShadow: "0 32px 80px rgba(124,58,237,0.3)", position: "relative", overflow: "hidden" }}>
+          style={{ maxWidth: "820px", margin: "0 auto", background: "linear-gradient(135deg, #022c22 0%, #064e3b 60%, #0f172a 100%)", borderRadius: "28px", padding: "4.5rem 3rem", textAlign: "center", boxShadow: "0 32px 80px rgba(34,197,94,0.15)", position: "relative", overflow: "hidden", border: "1px solid #1e293b" }}>
           {/* BG sparkles */}
           <div style={{ position: "absolute", top: "-50px", right: "-50px", width: "250px", height: "250px", borderRadius: "50%", background: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: "-40px", left: "60px", width: "160px", height: "160px", borderRadius: "50%", background: "rgba(255,255,255,0.05)", pointerEvents: "none" }} />
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "12px", fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "12px" }}>Get Started Now</p>
           <h2 style={{ fontSize: "2.75rem", fontWeight: 900, color: "#fff", marginBottom: "1rem", letterSpacing: "-0.5px" }}>Ready to deploy?</h2>
           <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "1.1rem", marginBottom: "2.5rem", lineHeight: 1.65 }}>Pick your role and join a live simulation in seconds.</p>
-          <Link to={auth.isAuthenticated() ? "/dashboard" : "/auth?tab=register"} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff", color: "#7c3aed", fontWeight: 800, padding: "16px 40px", borderRadius: "999px", fontSize: "16px", textDecoration: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.15)" }}>
+          <Link to={auth.isAuthenticated() ? "/dashboard" : "/auth?tab=register"} style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "linear-gradient(135deg, #22c55e, #4ade80)", color: "#fff", fontWeight: 800, padding: "16px 40px", borderRadius: "999px", fontSize: "16px", textDecoration: "none", boxShadow: "0 8px 28px rgba(34,197,94,0.35)" }}>
             {auth.isAuthenticated() ? "→ Go to Dashboard" : "→ Start Simulation for Free"}
           </Link>
         </motion.div>
@@ -202,7 +203,7 @@ export default function Landing() {
             {/* Brand col */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1rem" }}>
-                <div style={{ width: 36, height: 36, borderRadius: "10px", background: "#9333ea", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(147,51,234,0.3)" }}>
+                <div style={{ width: 36, height: 36, borderRadius: "10px", background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 14px rgba(34,197,94,0.3)" }}>
                   <svg
                     style={{ width: "20px", height: "20px", color: "white" }}
                     viewBox="0 0 24 24"
@@ -257,7 +258,7 @@ export default function Landing() {
           <div style={{ paddingTop: "2rem", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
             <p style={{ color: "#6b7280", fontSize: "13px" }}>
               © {new Date().getFullYear()} DeployFlow by{" "}
-              <a href="https://github.com/RaghavBatchu" target="_blank" rel="noopener noreferrer" style={{ color: "#818cf8", textDecoration: "none", fontWeight: 600 }}>Raghav Batchu</a>.
+              <a href="https://github.com/RaghavBatchu" target="_blank" rel="noopener noreferrer" style={{ color: "#4ade80", textDecoration: "none", fontWeight: 600 }}>Raghav Batchu</a>.
               Built with React, Node.js &amp; Socket.io.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>

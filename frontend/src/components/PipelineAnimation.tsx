@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 
 const stages = [
-  { label: "Build", color: "bg-violet-500", glow: "shadow-violet-400/50" },
-  { label: "Test", color: "bg-blue-500", glow: "shadow-blue-400/50" },
-  { label: "Deploy", color: "bg-cyan-500", glow: "shadow-cyan-400/50" },
-  { label: "Release", color: "bg-emerald-500", glow: "shadow-emerald-400/50" },
+  { label: "Build", color: "bg-green-500", glow: "shadow-green-400/50" },
+  { label: "Test", color: "bg-emerald-500", glow: "shadow-emerald-400/50" },
+  { label: "Deploy", color: "bg-teal-500", glow: "shadow-teal-400/50" },
+  { label: "Release", color: "bg-green-400", glow: "shadow-green-300/50" },
 ];
 
 const containerVariants = {
@@ -37,7 +37,7 @@ export default function PipelineAnimation() {
               <div className={`w-12 h-12 rounded-full ${stage.color} shadow-lg ${stage.glow} flex items-center justify-center animate-pulse-slow`}>
                 <div className="w-4 h-4 rounded-full bg-white/80" />
               </div>
-              <span className="text-xs font-semibold text-gray-500 tracking-wider uppercase">
+              <span className="text-xs font-semibold text-slate-500 tracking-wider uppercase">
                 {stage.label}
               </span>
             </motion.div>
@@ -51,7 +51,7 @@ export default function PipelineAnimation() {
                 transition={{ delay: i * 0.4 + 0.3, duration: 0.4 }}
                 style={{ transformOrigin: "left" }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-400 via-blue-400 to-cyan-400" />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400" />
                 {/* Animated travelling dot */}
                 <motion.div
                   className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white shadow"
